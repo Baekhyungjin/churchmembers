@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>교회 관리 시스템</title>
+<meta name="description" content="교인 관리, 헌금 출납, 심방, 기도 제목, 출석 관리를 위한 스마트 목회 관리 앱">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
+<meta name="theme-color" content="#1259C3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="교회관리">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="교회관리">
+
+<!-- Open Graph (SNS 미리보기) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="교회 관리 시스템">
+<meta property="og:description" content="교인관리·헌금출납·심방·기도제목·출석관리 — 스마트 목회 관리 플랫폼">
+<meta property="og:image" content="og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="교회 관리 시스템">
+<meta name="twitter:description" content="스마트 목회 관리 플랫폼 — 로컬 저장, 인터넷 불필요">
+<meta name="twitter:image" content="og-image.svg">
+
+<!-- KakaoTalk 미리보기 -->
+<meta property="og:site_name" content="교회 관리 시스템">
+<style>
+/* ===== Samsung One UI Design System ===== */
+:root {
+  --primary: #1259C3;
+  --primary-light: #E8F0FE;
+  --primary-dark: #0D47A1;
+  --bg: #F4F4F4;
+  --card: #FFFFFF;
+  --text: #1C1C1C;
+  --text2: #666666;
+  --text3: #999999;
+  --border: #E8E8E8;
+  --success: #00C853;
+  --success-bg: #E8F5E9;
+  --danger: #E53935;
+  --danger-bg: #FFEBEE;
+  --warning: #FF8F00;
+  --warning-bg: #FFF8E1;
+  --purple: #7B1FA2;
+  --purple-bg: #F3E5F5;
+  --nav-h: 64px;
+  --top-h: 56px;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,'Samsung One','Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:#D0D0D0;color:var(--text);font-size:15px;line-height:1.5}
+::-webkit-scrollbar{width:0;height:0}
+input,select,textarea,button{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ===== Layout ===== */
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(0,0,0,0.2)}
+.page-content{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 8px)}
+
+/* ===== Top Bar ===== */
+.topbar{background:var(--card);padding:0 16px;height:var(--top-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border)}
+.topbar-title{font-size:20px;font-weight:700;color:var(--text)}
+.topbar-actions{display:flex;gap:4px}
+.icon-btn{width:40px;height:40px;border:none;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:var(--text2)}
+.icon-btn:active{background:var(--bg)}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:var(--nav-h);background:var(--card);display:flex;border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:.15s;padding:6px 0}
+.nav-item.active{color:var(--primary)}
+.nav-icon{font-size:22px;line-height:1}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.02em}
+.nav-item.active .nav-icon{transform:scale(1.1)}
+
+/* ===== Page Sections ===== */
+.page{display:none;height:100%}
+.page.active{display:flex;flex-direction:column;height:100%}
+
+/* ===== Cards ===== */
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin:0 12px 12px;box-shadow:var(--shadow)}
+.card-sm{background:var(--card);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+
+/* ===== Section Header ===== */
+.sec-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:16px 16px 8px}
+
+/* ===== Chips / Badges ===== */
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip-blue{background:var(--primary-light);color:var(--primary)}
+.chip-green{background:var(--success-bg);color:#2E7D32}
+.chip-red{background:var(--danger-bg);color:var(--danger)}
+.chip-orange{background:var(--warning-bg);color:var(--warning)}
+.chip-purple{background:var(--purple-bg);color:var(--purple)}
+.chip-gray{background:#F0F0F0;color:#555}
+.chip-yellow{background:#FFFDE7;color:#F57F17}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:24px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:.15s;min-height:44px}
+.btn:active{opacity:.8}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-ghost{background:#F0F0F0;color:var(--text)}
+.btn-sm{padding:8px 16px;font-size:13px;min-height:36px;border-radius:18px}
+.btn-block{width:100%;border-radius:var(--radius-sm)}
+.btn-icon-label{flex-direction:column;gap:4px;padding:12px 8px;min-width:64px;border-radius:var(--radius-sm);background:var(--primary-light);color:var(--primary);font-size:12px}
+.btn-icon-label .bil-icon{font-size:22px}
+
+/* ===== FAB ===== */
+.fab{position:fixed;bottom:calc(var(--nav-h) + 16px);right:20px;width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:26px;box-shadow:0 4px 16px rgba(18,89,195,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:150;transition:.15s}
+.fab:active{transform:scale(.94)}
+
+/* ===== Search Bar ===== */
+.search-wrap{padding:8px 12px}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:24px;padding:10px 16px;box-shadow:var(--shadow)}
+.search-bar input{flex:1;border:none;outline:none;font-size:15px;background:transparent;color:var(--text)}
+.search-bar input::placeholder{color:var(--text3)}
+.search-icon{color:var(--text3);font-size:18px;flex-shrink:0}
+.search-clear{color:var(--text3);font-size:16px;cursor:pointer;flex-shrink:0}
+
+/* ===== List Items ===== */
+.list-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);cursor:pointer;transition:.1s}
+.list-item:last-child{border-bottom:none}
+.list-item:active{background:#F8F8F8}
+.list-item .avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.list-item .li-body{flex:1;min-width:0}
+.list-item .li-name{font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item .li-sub{font-size:13px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item .li-right{font-size:13px;color:var(--text2);text-align:right;flex-shrink:0}
+.list-card{background:var(--card);border-radius:var(--radius-sm);overflow:hidden;margin:0 12px 8px;box-shadow:var(--shadow)}
+
+/* ===== Stats ===== */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 12px 4px}
+.stat-box{background:var(--card);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow)}
+.stat-box .sb-label{font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px;white-space:nowrap}
+.stat-box .sb-val{font-size:clamp(14px,4vw,18px);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-box .sb-sub{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* ===== Bottom Sheet Modal ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end}
+.overlay.show{display:flex}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:92vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s ease}
+.overlay.show .sheet{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.sheet-hd{padding:16px 20px 12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.sheet-hd h3{font-size:18px;font-weight:700}
+.sheet-body{padding:0 20px 20px;overflow-y:auto;flex:1}
+.sheet-footer{padding:12px 20px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+
+/* ===== Full Screen Modal ===== */
+.fullscreen{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg);z-index:400;display:none;flex-direction:column}
+.fullscreen.show{display:flex}
+.fs-topbar{background:var(--card);padding:0 8px;height:var(--top-h);display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--border);flex-shrink:0}
+.fs-title{font-size:18px;font-weight:700;flex:1;padding:0 8px}
+.fs-content{flex:1;overflow-y:auto;padding-bottom:24px}
+
+/* ===== Forms ===== */
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.fg label{font-size:13px;font-weight:600;color:var(--text2)}
+.fg input,.fg select,.fg textarea{padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);background:#fff;transition:.15s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--primary);background:#fff}
+.fg textarea{resize:none;min-height:80px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ===== Toggle / Tab Bar ===== */
+.seg-ctrl{display:flex;background:#F0F0F0;border-radius:12px;padding:3px;margin:0 12px 12px}
+.seg-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:10px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:.15s}
+.seg-btn.active{background:var(--card);color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+/* ===== Finance specific ===== */
+.finance-hero{background:linear-gradient(135deg,var(--primary),#1a73e8);border-radius:var(--radius);margin:12px;padding:24px 20px;color:#fff;box-shadow:0 4px 20px rgba(18,89,195,.3)}
+.fh-label{font-size:13px;opacity:.8;margin-bottom:4px}
+.fh-amount{font-size:32px;font-weight:700;margin-bottom:16px}
+.fh-row{display:flex;justify-content:space-between}
+.fh-item{}
+.fh-item-label{font-size:12px;opacity:.7}
+.fh-item-val{font-size:18px;font-weight:700;margin-top:2px}
+.fh-item-val.income{color:#A5D6A7}
+.fh-item-val.expense{color:#EF9A9A}
+
+/* ===== Transaction item ===== */
+.tx-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #F8F8F8}
+.tx-item:last-child{border-bottom:none}
+.tx-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.tx-icon.income{background:var(--success-bg)}
+.tx-icon.expense{background:var(--danger-bg)}
+.tx-body{flex:1;min-width:0}
+.tx-name{font-size:15px;font-weight:600;color:var(--text)}
+.tx-sub{font-size:12px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-amount{font-size:16px;font-weight:700}
+.tx-amount.income{color:var(--success)}
+.tx-amount.expense{color:var(--danger)}
+
+/* ===== Member Profile ===== */
+.profile-hero{background:linear-gradient(135deg,#1259C3,#42A5F5);padding:24px 20px;text-align:center;color:#fff}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
+.profile-name{font-size:22px;font-weight:700;margin-bottom:4px}
+.profile-sub{font-size:14px;opacity:.85}
+.profile-actions{display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;padding:0 8px}
+.pa-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pa-btn:active{background:rgba(255,255,255,.3)}
+
+/* ===== Info list ===== */
+.info-list{background:var(--card);border-radius:var(--radius-sm);overflow:hidden;margin:0 12px 12px;box-shadow:var(--shadow)}
+.info-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid #F8F8F8}
+.info-row:last-child{border-bottom:none}
+.info-row .ir-label{font-size:13px;color:var(--text2);width:90px;flex-shrink:0}
+.info-row .ir-val{font-size:14px;color:var(--text);font-weight:500;flex:1}
+
+/* ===== Chart bar ===== */
+.chart-item{margin-bottom:12px}
+.ci-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.ci-label{font-size:13px;color:var(--text2)}
+.ci-val{font-size:13px;font-weight:600;color:var(--text)}
+.ci-bar-bg{height:8px;background:#F0F0F0;border-radius:4px;overflow:hidden}
+.ci-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+
+/* ===== Attendance ===== */
+.att-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px}
+.att-cell{background:var(--card);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;border:2px solid transparent;cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.att-cell.present{background:var(--success-bg);border-color:var(--success)}
+.att-cell.absent{background:var(--danger-bg);border-color:var(--danger)}
+.att-cell.online{background:var(--primary-light);border-color:var(--primary)}
+.att-cell .ac-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-cell .ac-status{font-size:11px;font-weight:700}
+.att-cell.present .ac-status{color:var(--success)}
+.att-cell.absent .ac-status{color:var(--danger)}
+.att-cell.online .ac-status{color:var(--primary)}
+.att-cell .ac-status{color:var(--text3)}
+
+/* ===== Birthday banner ===== */
+.bday-banner{background:linear-gradient(135deg,#FFF8E1,#FFECB3);border-radius:var(--radius-sm);margin:0 12px 8px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.bday-banner .bb-icon{font-size:32px}
+.bday-banner .bb-body h4{font-size:15px;font-weight:700;color:#5D4037}
+.bday-banner .bb-body p{font-size:13px;color:#795548;margin-top:2px}
+
+/* ===== Toast ===== */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(20px);background:#1C1C1C;color:#fff;padding:12px 20px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:.3s;white-space:nowrap;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1B5E20}
+.toast.error{background:#B71C1C}
+
+/* ===== Quick action grid ===== */
+.qa-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 12px 12px}
+.qa-item{background:var(--card);border-radius:var(--radius-sm);padding:12px 4px;text-align:center;cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+.qa-item:active{transform:scale(.95)}
+.qa-icon{font-size:24px;margin-bottom:6px}
+.qa-label{font-size:11px;font-weight:600;color:var(--text2);word-break:keep-all;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* ===== Empty state ===== */
+.empty{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:15px;line-height:1.5}
+
+/* ===== Tab indicator ===== */
+.tab-row{display:flex;border-bottom:2px solid var(--border);padding:0 12px;background:var(--card);flex-shrink:0}
+.tab-btn{padding:10px 8px;font-size:13px;font-weight:600;color:var(--text3);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;white-space:nowrap;flex:1;text-align:center}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ===== Filter pills ===== */
+.filter-row{display:flex;gap:8px;padding:8px 12px;overflow-x:auto}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-pill{padding:6px 14px;border-radius:20px;background:var(--card);border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.filter-pill.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+
+/* ===== Scroll area ===== */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ===== Divider ===== */
+.divider{height:8px;background:var(--bg)}
+
+/* ===== Alert dot ===== */
+.alert-dot{width:8px;height:8px;background:var(--danger);border-radius:50%;display:inline-block;margin-left:4px;vertical-align:middle}
+
+/* ===== Note box ===== */
+.note-box{background:#F8F9FA;border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+
+/* ===== SMS Sheet ===== */
+.sms-recipient{background:var(--primary-light);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sms-recipient .sr-icon{font-size:24px}
+.sms-recipient .sr-body .sr-name{font-size:15px;font-weight:700;color:var(--primary)}
+.sms-recipient .sr-body .sr-phone{font-size:13px;color:var(--text2);margin-top:1px}
+.sms-tpl-cats{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.sms-tpl-cats::-webkit-scrollbar{display:none}
+.sms-cat-pill{padding:6px 14px;border-radius:20px;background:#F0F0F0;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;border:none;transition:.15s}
+.sms-cat-pill.active{background:var(--primary-light);color:var(--primary)}
+.sms-tpl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.sms-tpl-item{background:#F8F9FA;border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;border:1.5px solid transparent;transition:.15s}
+.sms-tpl-item:active,.sms-tpl-item.selected{background:var(--primary-light);border-color:var(--primary)}
+.sms-tpl-item .sti-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.sms-tpl-item .sti-preview{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sms-textarea-wrap{position:relative}
+.sms-textarea-wrap textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text);resize:none;min-height:120px;line-height:1.6;transition:.15s}
+.sms-textarea-wrap textarea:focus{outline:none;border-color:var(--primary)}
+.sms-char-count{text-align:right;font-size:12px;color:var(--text3);margin-top:4px}
+.sms-char-count.warn{color:var(--warning)}
+
+/* ===== Bulk SMS ===== */
+.bulk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.bulk-member-box{max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px}
+.bulk-member-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #F8F8F8}
+.bulk-member-item:last-child{border-bottom:none}
+.bmi-info{flex:1;min-width:0}
+.bmi-name{font-size:14px;font-weight:600;color:var(--text)}
+.bmi-sub{font-size:12px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
+.bulk-tpl-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;padding-bottom:2px}
+.bulk-tpl-row::-webkit-scrollbar{display:none}
+.bulk-tpl-pill{padding:5px 12px;border-radius:16px;background:#F0F0F0;border:none;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.bulk-tpl-pill:active{background:var(--primary-light);color:var(--primary)}
+
+/* ===== Excel Import ===== */
+.import-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:.15s;background:var(--bg);margin-bottom:8px}
+.import-drop:active{border-color:var(--primary);background:var(--primary-light)}
+.import-drop .id-icon{font-size:44px;margin-bottom:8px}
+.import-drop .id-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.import-drop .id-sub{font-size:13px;color:var(--text2);line-height:1.5}
+.import-scroll{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.import-tbl{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.import-tbl th{background:var(--primary);color:#fff;padding:7px 10px;text-align:left;font-weight:700}
+.import-tbl td{padding:6px 10px;border-bottom:1px solid #F0F0F0;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.col-tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600;margin:2px}
+.col-tag.ok{background:var(--success-bg);color:#2E7D32}
+.col-tag.skip{background:#F0F0F0;color:var(--text3)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="page active" id="page-home">
+    <div class="topbar">
+      <div class="topbar-title">교회 관리</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="showAddMenu()">➕</button>
+        <button class="icon-btn" title="데이터 관리" onclick="openSettings()">⚙️</button>
+      </div>
+    </div>
+    <div class="page-content" id="home-content"></div>
+  </div>
+
+  <div class="page" id="page-members">
+    <div class="topbar">
+      <div class="topbar-title">교인 관리</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="엑셀 가져오기" onclick="openImportSheet()">📥</button>
+        <button class="icon-btn" title="단체문자" onclick="openBulkSmsSheet()">📢</button>
+        <button class="icon-btn" onclick="openMemberSheet()">➕</button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="m-search" placeholder="이름, 연락처, 주소 검색..." oninput="renderMembers()">
+        <span class="search-clear" id="m-clear" onclick="clearSearch()" style="display:none">✕</span>
+      </div>
+    </div>
+    <div class="filter-row" id="m-filter-row">
+      <div class="filter-pill active" onclick="setMFilter('all',this)">전체</div>
+      <div class="filter-pill" onclick="setMFilter('장년부',this)">장년부</div>
+      <div class="filter-pill" onclick="setMFilter('청년부',this)">청년부</div>
+      <div class="filter-pill" onclick="setMFilter('대학부',this)">대학부</div>
+      <div class="filter-pill" onclick="setMFilter('고등부',this)">고등부</div>
+      <div class="filter-pill" onclick="setMFilter('중등부',this)">중등부</div>
+      <div class="filter-pill" onclick="setMFilter('초등부',this)">초등부</div>
+      <div class="filter-pill" onclick="setMFilter('유치부',this)">유치부</div>
+    </div>
+    <div class="scroll-area" id="members-list"></div>
+  </div>
+
+  <div class="page" id="page-finance">
+    <div class="topbar">
+      <div class="topbar-title">교회 재정</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="exportFinance()">📊</button>
+        <button class="icon-btn" onclick="openFinanceSheet('income')">➕</button>
+      </div>
+    </div>
+    <div class="page-content" id="finance-content"></div>
+  </div>
+
+  <div class="page" id="page-ministry">
+    <div class="topbar">
+      <div class="topbar-title" id="ministry-title">심방 · 기도</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="ministry-add-btn" onclick="openMinistrySheet()">➕</button>
+      </div>
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setMinistryTab('visitation',this)">🚗 심방</button>
+      <button class="tab-btn" onclick="setMinistryTab('prayer',this)">🙏 기도 제목</button>
+    </div>
+    <div class="scroll-area" id="ministry-content"></div>
+  </div>
+
+  <div class="page" id="page-attendance">
+    <div class="topbar">
+      <div class="topbar-title">출석 관리</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="saveAttendance()">💾</button>
+        <button class="icon-btn" onclick="exportAttendance()">📊</button>
+      </div>
+    </div>
+    <div class="page-content" id="att-content"></div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="navTo('home',this)">
+    <span class="nav-icon">🏠</span><span class="nav-label">홈</span>
+  </button>
+  <button class="nav-item" onclick="navTo('members',this)">
+    <span class="nav-icon">👥</span><span class="nav-label">교인</span>
+  </button>
+  <button class="nav-item" onclick="navTo('finance',this)">
+    <span class="nav-icon">💰</span><span class="nav-label">재정</span>
+  </button>
+  <button class="nav-item" onclick="navTo('ministry',this)">
+    <span class="nav-icon">🙏</span><span class="nav-label">사역</span>
+  </button>
+  <button class="nav-item" onclick="navTo('attendance',this)">
+    <span class="nav-icon">📋</span><span class="nav-label">출석</span>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- PWA Install Banner (Android/Chrome) -->
+<div id="install-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h)+12px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:456px;background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:250;align-items:center;gap:12px;border:1px solid var(--border)">
+  <img src="favicon.svg" style="width:40px;height:40px;border-radius:10px;flex-shrink:0">
+  <div style="flex:1;min-width:0">
+    <div style="font-size:14px;font-weight:700;color:var(--text)">홈 화면에 설치하기</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:2px">앱처럼 빠르게 실행할 수 있어요</div>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="installApp()" style="white-space:nowrap">설치</button>
+  <button class="icon-btn" onclick="document.getElementById('install-banner').style.display='none'" style="flex-shrink:0">✕</button>
+</div>
+
+<!-- iOS Install Guide Banner -->
+<div id="ios-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h)+12px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:456px;background:#1C1C1C;border-radius:var(--radius);padding:14px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.3);z-index:250;align-items:center;gap:12px">
+  <div style="font-size:20px;flex-shrink:0">📲</div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:13px;font-weight:700;color:#fff">홈 화면에 추가하려면</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">하단 공유 버튼 <b style="color:#fff">⬆</b> → <b style="color:#64B5F6">'홈 화면에 추가'</b> 선택</div>
+  </div>
+  <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('ios-banner-dismissed','1')" style="border:none;background:rgba(255,255,255,0.15);color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;flex-shrink:0">✕</button>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Member Add/Edit Sheet -->
+<div class="overlay" id="sheet-member" onclick="if(event.target===this)closeSheet('sheet-member')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3 id="member-sheet-title">교인 등록</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-member')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-section">
+        <div class="form-section-title">기본 정보</div>
+        <div class="row2">
+          <div class="fg"><label>이름 *</label><input id="mf-name" placeholder="홍길동"></div>
+          <div class="fg"><label>성별</label><select id="mf-gender"><option value="">선택</option><option>남</option><option>여</option></select></div>
+        </div>
+        <div class="fg"><label>생년월일</label><input type="date" id="mf-birth"></div>
+        <div class="fg"><label>연락처</label><input type="tel" id="mf-phone" placeholder="010-0000-0000"></div>
+        <div class="fg"><label>연락처 2 (비상)</label><input type="tel" id="mf-phone2" placeholder="010-0000-0000"></div>
+        <div class="fg"><label>이메일</label><input type="email" id="mf-email" placeholder="example@email.com"></div>
+        <div class="fg"><label>주소</label><input id="mf-addr" placeholder="주소를 입력하세요"></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">교회 정보</div>
+        <div class="row2">
+          <div class="fg"><label>직분</label><select id="mf-pos"></select></div>
+          <div class="fg"><label>부서</label><select id="mf-dept"></select></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><label>구역</label><input id="mf-district" placeholder="1구역"></div>
+          <div class="fg"><label>가족 그룹</label><input id="mf-family" placeholder="홍길동 가정"></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><label>등록일</label><input type="date" id="mf-regdate"></div>
+          <div class="fg"><label>세례일</label><input type="date" id="mf-baptism"></div>
+        </div>
+        <div class="fg"><label>상태</label><select id="mf-active"><option value="true">활동중</option><option value="false">비활동</option></select></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">목회 노트</div>
+        <div class="fg"><label>메모</label><textarea id="mf-memo" placeholder="특이사항, 목회 노트, 기도 제목 등을 자유롭게 기록하세요"></textarea></div>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheet-member')">취소</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveMember()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finance Sheet -->
+<div class="overlay" id="sheet-finance" onclick="if(event.target===this)closeSheet('sheet-finance')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3 id="finance-sheet-title">재정 등록</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-finance')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="seg-ctrl" style="margin:0 0 16px">
+        <button class="seg-btn active" id="ft-income-btn" onclick="setFinanceType('income')">수입 (헌금)</button>
+        <button class="seg-btn" id="ft-expense-btn" onclick="setFinanceType('expense')">지출</button>
+      </div>
+      <div class="fg"><label>날짜 *</label><input type="date" id="ff-date"></div>
+      <div class="fg"><label>분류 *</label><select id="ff-cat"></select></div>
+      <div class="fg" id="ff-member-fg">
+        <label>교인 (수입시)</label>
+        <select id="ff-member"><option value="">익명/무기명</option></select>
+      </div>
+      <div class="fg"><label>금액 *</label><input type="number" id="ff-amount" placeholder="0" min="0"></div>
+      <div class="fg"><label>납부/지급 방법</label>
+        <select id="ff-method"><option>현금</option><option>계좌이체</option><option>카드</option><option>온라인</option><option>수표</option></select>
+      </div>
+      <div class="fg"><label>설명/비고</label><textarea id="ff-desc" placeholder="내용을 입력하세요" rows="3"></textarea></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheet-finance')">취소</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveFinance()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Visitation Sheet -->
+<div class="overlay" id="sheet-visit" onclick="if(event.target===this)closeSheet('sheet-visit')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3 id="visit-sheet-title">심방 기록</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-visit')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="fg"><label>심방 날짜 *</label><input type="date" id="vf-date"></div>
+      <div class="fg"><label>교인 *</label><select id="vf-member"><option value="">선택하세요</option></select></div>
+      <div class="fg"><label>심방 목적</label>
+        <select id="vf-purpose"><option>정기심방</option><option>환자심방</option><option>위로심방</option><option>축하심방</option><option>전도심방</option><option>상담심방</option><option>기타</option></select>
+      </div>
+      <div class="fg"><label>심방 내용</label><textarea id="vf-content" placeholder="심방 내용을 기록하세요" rows="3"></textarea></div>
+      <div class="fg"><label>기도 내용</label><textarea id="vf-prayer" placeholder="함께 나눈 기도 제목" rows="2"></textarea></div>
+      <div class="fg"><label>다음 심방 예정일</label><input type="date" id="vf-next"></div>
+      <div class="fg"><label>비고</label><textarea id="vf-notes" rows="2"></textarea></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheet-visit')">취소</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveVisit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prayer Sheet -->
+<div class="overlay" id="sheet-prayer" onclick="if(event.target===this)closeSheet('sheet-prayer')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3 id="prayer-sheet-title">기도 제목</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-prayer')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="row2">
+        <div class="fg"><label>날짜 *</label><input type="date" id="pf-date"></div>
+        <div class="fg"><label>상태</label><select id="pf-answered"><option value="false">기도중</option><option value="true">응답됨</option></select></div>
+      </div>
+      <div class="fg"><label>교인 (없으면 공동체)</label><select id="pf-member"><option value="">공동체 기도제목</option></select></div>
+      <div class="fg"><label>기도 내용 *</label><textarea id="pf-content" placeholder="기도 제목을 입력하세요" rows="4"></textarea></div>
+      <div class="fg" id="pf-ansdate-fg"><label>응답일</label><input type="date" id="pf-ansdate"></div>
+      <div class="fg"><label>비고</label><textarea id="pf-notes" rows="2"></textarea></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheet-prayer')">취소</button>
+      <button class="btn btn-primary" style="flex:2" onclick="savePrayer()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="overlay" id="sheet-qr" style="z-index:600" onclick="if(event.target===this)closeSheet('sheet-qr')">
+  <div class="sheet" style="max-height:70vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd"><h3>📱 QR코드 접속</h3><button class="icon-btn" onclick="closeSheet('sheet-qr')">✕</button></div>
+    <div class="sheet-body" style="text-align:center;padding-bottom:24px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px">같은 WiFi에 연결된 스마트폰으로 스캔하세요</div>
+      <div id="qr-canvas-wrap" style="display:inline-block;background:#fff;padding:16px;border-radius:16px;box-shadow:var(--shadow-md);margin-bottom:16px">
+        <canvas id="qr-canvas" width="200" height="200"></canvas>
+      </div>
+      <div id="qr-url" style="font-size:13px;color:var(--primary);font-weight:700;word-break:break-all;padding:0 8px;margin-bottom:8px"></div>
+      <div style="font-size:12px;color:var(--text3)">서버가 실행 중일 때만 작동합니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- Netlify Deploy Guide Modal -->
+<div class="overlay" id="sheet-netlify" style="z-index:600" onclick="if(event.target===this)closeSheet('sheet-netlify')">
+  <div class="sheet" style="max-height:90vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd"><h3>🌐 Netlify 무료 배포</h3><button class="icon-btn" onclick="closeSheet('sheet-netlify')">✕</button></div>
+    <div class="sheet-body">
+      <div style="background:linear-gradient(135deg,#00AD9F,#00C7B7);border-radius:var(--radius-sm);padding:14px 16px;color:#fff;margin-bottom:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px">무료 · 계정 불필요 · 30초 배포</div>
+        <div style="font-size:12px;opacity:.9">배포 후 링크 하나로 누구나 어디서든 앱 사용</div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px">📋 배포 순서</div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">앱 파일 준비</div>
+            <div style="font-size:12px;color:var(--text2)">아래 버튼으로 배포용 ZIP 파일을 다운로드하세요</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">Netlify Drop 접속</div>
+            <div style="font-size:12px;color:var(--text2)">아래 버튼으로 Netlify Drop 페이지를 엽니다</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">ZIP 파일 드래그 & 드롭</div>
+            <div style="font-size:12px;color:var(--text2)">다운로드한 ZIP 파일을 브라우저 창에 드래그하면 즉시 배포 완료!</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--success);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">✓</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px;color:var(--success)">배포 완료!</div>
+            <div style="font-size:12px;color:var(--text2)">예: <b>https://amazing-church.netlify.app</b><br>이 링크를 카카오톡으로 공유하면 끝!</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary btn-block" onclick="downloadDeployZip()">📦 배포용 ZIP 다운로드</button>
+        <button class="btn btn-block" style="background:#00AD9F;color:#fff;border-radius:var(--radius-sm)" onclick="window.open('https://app.netlify.com/drop','_blank')">🌐 Netlify Drop 열기</button>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost btn-block" onclick="closeSheet('sheet-netlify')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings / Data Management Sheet -->
+<div class="overlay" id="sheet-settings" onclick="if(event.target===this)closeSheet('sheet-settings')">
+  <div class="sheet" style="max-height:92vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3>⚙️ 데이터 관리</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-settings')">✕</button>
+    </div>
+    <div class="sheet-body">
+
+      <!-- Storage Status -->
+      <div style="background:var(--primary-light);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px">💾 현재 저장 현황</div>
+        <div id="storage-stat" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(18,89,195,0.15);font-size:12px;color:var(--text2)" id="storage-size"></div>
+      </div>
+
+      <!-- Share / Deploy -->
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">🔗 앱 공유 · 배포</div>
+      <div style="background:var(--card);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:6px;box-shadow:var(--shadow)">
+        <div onclick="showQR()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border)">
+          <span style="font-size:24px">📱</span>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700">이 기기 QR코드 접속</div>
+            <div style="font-size:12px;color:var(--text2)">같은 WiFi의 스마트폰으로 바로 접속</div>
+          </div>
+          <span style="color:var(--text3)">›</span>
+        </div>
+        <div onclick="openNetlifyDrop()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+          <span style="font-size:24px">🌐</span>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700">인터넷 배포 (Netlify)</div>
+            <div style="font-size:12px;color:var(--text2)">무료 · 30초 · 링크로 어디서든 접속</div>
+          </div>
+          <span style="color:var(--text3)">›</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:20px;padding:0 4px">
+        💡 링크를 공유하면 누구나 앱을 바로 사용할 수 있습니다 (데이터는 각자 기기에 저장)
+      </div>
+
+      <!-- Primary: HTML + Data download -->
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">📄 앱 다운로드</div>
+      <div onclick="downloadAppWithData()" style="background:var(--card);border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:16px;margin-bottom:6px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--card)'">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px">📄</span>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--primary)">HTML + 데이터 함께 저장</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">현재 교인·재정 데이터가 포함된 HTML 파일<br>다른 기기·PC에서 열면 데이터가 그대로 복원됩니다</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:20px;padding:0 4px">
+        💡 이동하거나 공유할 때는 이 방식을 추천합니다
+      </div>
+
+      <!-- Backup / Restore -->
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">💾 백업 · 복원</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+        <button class="btn btn-outline btn-block" onclick="exportDataJson()">
+          💾 데이터 백업 저장 (.json)
+        </button>
+        <label class="btn btn-ghost btn-block" style="cursor:pointer;justify-content:center">
+          📂 데이터 백업 불러오기 (.json)
+          <input type="file" accept=".json" style="display:none" onchange="importDataJson(this)">
+        </label>
+        <button class="btn btn-ghost btn-block" onclick="exportAll()">
+          📊 Excel 전체 내보내기
+        </button>
+      </div>
+
+      <!-- Danger zone -->
+      <div style="font-size:12px;font-weight:700;color:var(--danger);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">⚠️ 위험 구역</div>
+      <button class="btn btn-block" style="background:var(--danger-bg);color:var(--danger);border-radius:var(--radius-sm)" onclick="clearAllData()">
+        🗑️ 모든 데이터 초기화
+      </button>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;padding:0 4px">초기화 후 복원하려면 미리 백업을 저장하세요</div>
+
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost btn-block" onclick="closeSheet('sheet-settings')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- SMS Sheet -->
+<div class="overlay" id="sheet-sms" style="z-index:500" onclick="if(event.target===this)closeSheet('sheet-sms')">
+  <div class="sheet" style="max-height:88vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3>💬 문자 메시지</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-sms')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="sms-recipient" id="sms-recipient-info">
+        <div class="sr-icon">👤</div>
+        <div class="sr-body">
+          <div class="sr-name" id="sms-name">-</div>
+          <div class="sr-phone" id="sms-phone">-</div>
+        </div>
+      </div>
+      <div class="form-section-title" style="margin-bottom:8px">📋 기본 메시지 템플릿</div>
+      <div class="sms-tpl-cats" id="sms-cat-tabs"></div>
+      <div class="sms-tpl-list" id="sms-tpl-list"></div>
+      <div class="form-section-title" style="margin-bottom:8px">✏️ 메시지 편집</div>
+      <div class="sms-textarea-wrap">
+        <textarea id="sms-text" placeholder="메시지를 입력하세요..." oninput="updateSmsCount()"></textarea>
+      </div>
+      <div class="sms-char-count" id="sms-char-count">0자</div>
+    </div>
+    <div class="sheet-footer" style="flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn btn-primary" style="flex:1" onclick="sendSms()">📤 문자</button>
+        <button class="btn" style="flex:1;background:#FEE500;color:#391B1B;font-weight:700;white-space:nowrap" onclick="sendKakao()">💛 카카오톡</button>
+      </div>
+      <button class="btn btn-ghost btn-block" onclick="closeSheet('sheet-sms')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk SMS Sheet -->
+<div class="overlay" id="sheet-bulk-sms" style="z-index:500" onclick="if(event.target===this)closeSheet('sheet-bulk-sms')">
+  <div class="sheet" style="max-height:92vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3>📢 단체 문자</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-bulk-sms')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="filter-row" id="bulk-filter-row" style="padding:0 0 10px;margin:0"></div>
+      <div class="bulk-head">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="bulk-check-all" onchange="toggleBulkAll(this)">전체 선택
+        </label>
+        <span id="bulk-count" style="font-size:13px;color:var(--primary);font-weight:700">0명 선택</span>
+      </div>
+      <div class="bulk-member-box" id="bulk-member-list"></div>
+      <div class="form-section-title" style="margin-bottom:6px">📋 빠른 템플릿</div>
+      <div class="bulk-tpl-row" id="bulk-tpl-row"></div>
+      <div class="form-section-title" style="margin-bottom:8px">✏️ 메시지 편집</div>
+      <div class="sms-textarea-wrap">
+        <textarea id="bulk-text" placeholder="단체로 보낼 메시지를 입력하세요..." rows="5" oninput="updateBulkCount()"></textarea>
+      </div>
+      <div class="sms-char-count" id="bulk-char-count">0자</div>
+    </div>
+    <div class="sheet-footer" style="flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn btn-primary" style="flex:1" onclick="sendBulkSms()">📤 문자</button>
+        <button class="btn" style="flex:1;background:#FEE500;color:#391B1B;font-weight:700;white-space:nowrap" onclick="sendBulkKakao()">💛 카카오톡</button>
+      </div>
+      <button class="btn btn-ghost btn-block" onclick="closeSheet('sheet-bulk-sms')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Excel Import Sheet -->
+<div class="overlay" id="sheet-import" style="z-index:500" onclick="if(event.target===this)closeSheet('sheet-import')">
+  <div class="sheet" style="max-height:92vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <h3>📥 엑셀 교인 가져오기</h3>
+      <button class="icon-btn" onclick="closeSheet('sheet-import')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div id="import-upload-area">
+        <div class="import-drop" onclick="document.getElementById('import-file').click()">
+          <div class="id-icon">📂</div>
+          <div class="id-title">엑셀 파일을 선택하세요</div>
+          <div class="id-sub">.xlsx · .xls · .csv 지원<br>첫 번째 행은 헤더(이름, 연락처 등)</div>
+        </div>
+        <input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(this)">
+        <div style="background:#F8F9FA;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.7">
+          <b>인식 가능한 컬럼명 예시</b><br>
+          이름, 성별, 생년월일, 연락처, 이메일, 주소,<br>직분, 부서, 구역, 등록일, 세례일, 상태, 메모
+        </div>
+      </div>
+      <div id="import-preview-area" style="display:none"></div>
+    </div>
+    <div class="sheet-footer" style="flex-wrap:wrap;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="resetImport()">↩ 다시선택</button>
+      <button class="btn btn-outline" id="import-add-btn" style="flex:1;display:none" onclick="importMembers('add')">➕ 추가</button>
+      <button class="btn btn-primary" id="import-replace-btn" style="flex:1;display:none" onclick="importMembers('replace')">🔄 전체교체</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Menu Sheet -->
+<div class="overlay" id="sheet-addmenu" onclick="if(event.target===this)closeSheet('sheet-addmenu')">
+  <div class="sheet" style="max-height:50vh">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd"><h3>새로 추가</h3><button class="icon-btn" onclick="closeSheet('sheet-addmenu')">✕</button></div>
+    <div class="sheet-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="qa-item" style="margin:0" onclick="closeSheet('sheet-addmenu');openMemberSheet()"><div class="qa-icon">👤</div><div class="qa-label">교인 등록</div></div>
+      <div class="qa-item" style="margin:0" onclick="closeSheet('sheet-addmenu');openFinanceSheet('income')"><div class="qa-icon">💰</div><div class="qa-label">수입 입력</div></div>
+      <div class="qa-item" style="margin:0" onclick="closeSheet('sheet-addmenu');openFinanceSheet('expense')"><div class="qa-icon">📤</div><div class="qa-label">지출 입력</div></div>
+      <div class="qa-item" style="margin:0" onclick="closeSheet('sheet-addmenu');openVisitSheet()"><div class="qa-icon">🚗</div><div class="qa-label">심방 기록</div></div>
+      <div class="qa-item" style="margin:0" onclick="closeSheet('sheet-addmenu');openPrayerSheet()"><div class="qa-icon">🙏</div><div class="qa-label">기도 제목</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Member Profile Fullscreen -->
+<div class="fullscreen" id="fs-profile">
+  <div class="fs-topbar">
+    <button class="icon-btn" onclick="closeFullscreen('fs-profile')">‹</button>
+    <div class="fs-title" id="fs-profile-name">교인 정보</div>
+    <button class="icon-btn" id="fs-profile-edit">✏️</button>
+    <button class="icon-btn" id="fs-profile-del">🗑️</button>
+  </div>
+  <div class="tab-row" style="background:var(--card)">
+    <button class="tab-btn active" onclick="setProfileTab('info',this)">정보</button>
+    <button class="tab-btn" onclick="setProfileTab('finance',this)">헌금</button>
+    <button class="tab-btn" onclick="setProfileTab('visit',this)">심방</button>
+    <button class="tab-btn" onclick="setProfileTab('prayer',this)">기도</button>
+    <button class="tab-btn" onclick="setProfileTab('attend',this)">출석</button>
+  </div>
+  <div class="fs-content" id="fs-profile-content"></div>
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script>
+// ===========================
+// CONSTANTS
+// ===========================
+const POSITIONS=['성도','서리집사','집사','안수집사','권사','장로','전도사','강도사','부목사','담임목사'];
+const SMS_TEMPLATES=[
+  {category:'생일·축하',icon:'🎂',templates:[
+    {label:'생일 축하',text:'🎂 {이름} 성도님, 생일을 진심으로 축하드립니다!\n하나님의 은혜와 축복이 충만한 한 해 되시길 기도합니다.\n- 담임목사 드림'},
+    {label:'결혼기념일 축하',text:'🌹 {이름} 성도님, 결혼기념일을 축하드립니다!\n두 분의 사랑이 하나님 안에서 더욱 깊어지시길 바랍니다.\n- 담임목사 드림'},
+    {label:'수료·졸업 축하',text:'🎓 {이름} 성도님, 졸업(수료)을 진심으로 축하드립니다!\n하나님께서 앞길을 인도해 주시길 기도합니다.'},
+  ]},
+  {category:'예배·기도',icon:'⛪',templates:[
+    {label:'주일 예배 안내',text:'🙏 {이름} 성도님,\n이번 주일 예배에 함께해 주시기를 기대합니다.\n▪ 시간: 오전 11시\n▪ 장소: 본당\n하나님의 은혜가 충만하시길 바랍니다.'},
+    {label:'새벽 기도 초대',text:'🌅 {이름} 성도님,\n매일 새벽 5시 30분 새벽기도회에 초대합니다.\n함께 하나님 앞에 나아가요!'},
+    {label:'특별 기도회 안내',text:'📢 {이름} 성도님,\n특별 기도회를 안내드립니다.\n▪ 일시: ___월 ___일 ___시\n▪ 장소: 본당\n함께 기도의 자리를 채워주세요!'},
+  ]},
+  {category:'심방·방문',icon:'🚗',templates:[
+    {label:'심방 예정 알림',text:'안녕하세요, {이름} 성도님.\n이번 주 심방을 드리려고 합니다.\n편하신 시간을 알려주시면 감사하겠습니다.\n- 담임목사 드림'},
+    {label:'심방 일정 확인',text:'{이름} 성도님, 안녕하세요!\n___요일 ___시에 심방 드려도 될까요?\n확인 부탁드립니다 😊'},
+    {label:'심방 감사 인사',text:'{이름} 성도님, 오늘 귀한 시간 내주셔서 감사합니다.\n함께 나눈 대화와 기도가 큰 위로가 되었습니다.\n하나님의 은혜가 함께하시길 기도합니다.'},
+  ]},
+  {category:'안부·위로',icon:'💙',templates:[
+    {label:'일반 안부',text:'안녕하세요, {이름} 성도님!\n요즘 건강하게 잘 지내시는지 궁금해서 연락드렸습니다.\n항상 하나님의 보호하심이 함께하시길 기도합니다.'},
+    {label:'위로 메시지',text:'안녕하세요, {이름} 성도님.\n어려운 시간을 보내고 계신다고 들었습니다.\n주님의 위로와 평안이 함께하시길 기도드립니다.\n필요한 것이 있으면 언제든지 연락 주세요.'},
+    {label:'쾌유 기원',text:'🌿 {이름} 성도님,\n속히 쾌유하시길 기도드립니다!\n하나님의 치유하심이 임하시기를 바라며,\n건강 회복하시면 함께 예배드리기를 기대합니다.'},
+    {label:'퇴원 축하',text:'🌹 {이름} 성도님, 퇴원을 축하드립니다!\n하나님께 감사드리며, 완전히 회복하셔서\n건강한 모습으로 예배 자리에서 뵙기를 기대합니다.'},
+  ]},
+  {category:'헌금·감사',icon:'🙏',templates:[
+    {label:'헌금 감사',text:'🙏 {이름} 성도님,\n하나님 나라를 위한 귀한 헌신에 감사드립니다.\n드리신 헌금이 하나님께 영광이 되기를 기도합니다.'},
+    {label:'봉사 감사',text:'✨ {이름} 성도님,\n오늘도 귀한 봉사를 해주셔서 감사합니다.\n섬겨 주신 수고가 하나님께 아름다운 향기가 되기를 바랍니다.'},
+  ]},
+  {category:'행사·공지',icon:'📢',templates:[
+    {label:'행사 초대',text:'📢 {이름} 성도님, 안녕하세요!\n[행사명] 행사에 초대합니다.\n▪ 일시: ___월 ___일 ___시\n▪ 장소: ___\n많은 참여 부탁드립니다!'},
+    {label:'교회 공지',text:'{이름} 성도님, 안녕하세요!\n중요한 공지 사항을 알려드립니다.\n[내용]\n궁금한 점은 언제든 연락 주세요.'},
+    {label:'수련회 안내',text:'🏕️ {이름} 성도님,\n교회 수련회를 안내드립니다.\n▪ 일시: ___\n▪ 장소: ___\n▪ 참가비: ___\n신청 문의 주세요!'},
+  ]},
+];
+const DEPARTMENTS=['장년부','청년부','대학부','고등부','중등부','초등부','유치부','영아부','남선교회','여전도회','찬양대'];
+const INCOME_CATS=['십일조','주정헌금','감사헌금','건축헌금','선교헌금','구제헌금','봉사헌금','기타헌금','기타수입'];
+const EXPENSE_CATS=['예배/성례비','교육비','선교비','구제/복지비','관리/수선비','인건비','행정/사무비','식비','교통비','기타지출'];
+const CAT_ICONS={
+  '십일조':'💎','주정헌금':'📅','감사헌금':'🙏','건축헌금':'🏗️','선교헌금':'✈️','구제헌금':'❤️','봉사헌금':'🤝','기타헌금':'💵','기타수입':'💹',
+  '예배/성례비':'⛪','교육비':'📚','선교비':'🌏','구제/복지비':'🫶','관리/수선비':'🔧','인건비':'👔','행정/사무비':'📋','식비':'🍽️','교통비':'🚌','기타지출':'📦'
+};
+
+// ===========================
+// DB
+// ===========================
+const DB={
+  _get(k){try{return JSON.parse(localStorage.getItem('church_'+k)||'[]')}catch{return[]}},
+  _obj(k){try{return JSON.parse(localStorage.getItem('church_'+k)||'{}')}catch{return{}}},
+  _set(k,v){localStorage.setItem('church_'+k,JSON.stringify(v))},
+  get members(){return this._get('members')},set members(v){this._set('members',v)},
+  get finance(){return this._get('finance')},set finance(v){this._set('finance',v)},
+  get visitations(){return this._get('visitations')},set visitations(v){this._set('visitations',v)},
+  get prayers(){return this._get('prayers')},set prayers(v){this._set('prayers',v)},
+  get attendance(){return this._obj('attendance')},set attendance(v){this._set('attendance',v)},
+  id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+};
+
+// ===========================
+// UTILS
+// ===========================
+const today=()=>new Date().toISOString().slice(0,10);
+const thisMonth=()=>new Date().toISOString().slice(0,7);
+function fmtDate(d){if(!d)return'-';const[y,m,dd]=d.split('-');return `${y}.${m}.${dd}`}
+function fmtDateKo(d){if(!d)return'-';const[y,m,dd]=d.split('-');return `${y}년 ${+m}월 ${+dd}일`}
+function fmtMoney(n){return n?Number(n).toLocaleString()+'원':'0원'}
+function calcAge(b){if(!b)return null;const t=new Date(),bd=new Date(b);let a=t.getFullYear()-bd.getFullYear();if(t.getMonth()<bd.getMonth()||(t.getMonth()===bd.getMonth()&&t.getDate()<bd.getDate()))a--;return a}
+function isBdayToday(b){if(!b)return false;const t=new Date(),bd=new Date(b);return t.getMonth()===bd.getMonth()&&t.getDate()===bd.getDate()}
+function isBdayThisWeek(b){if(!b)return false;const now=new Date(),bd=new Date(b);for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);if(d.getMonth()===bd.getMonth()&&d.getDate()===bd.getDate())return true}return false}
+function isBdayThisMonth(b){if(!b)return false;return new Date(b).getMonth()===new Date().getMonth()}
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',2500)}
+function getSundayStr(){const d=new Date();d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10)}
+
+// ===========================
+// NAVIGATION
+// ===========================
+let currentPage='home';
+function navTo(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  currentPage=page;
+  if(page==='home')renderHome();
+  if(page==='members')renderMembers();
+  if(page==='finance')renderFinance();
+  if(page==='ministry')renderMinistry();
+  if(page==='attendance')renderAttendance();
+}
+
+// ===========================
+// MODALS
+// ===========================
+function closeSheet(id){
+  const o=document.getElementById(id);
+  o.classList.remove('show');
+  setTimeout(()=>o.style.display='none',300);
+}
+function openSheet(id){
+  const o=document.getElementById(id);
+  o.style.display='flex';
+  requestAnimationFrame(()=>o.classList.add('show'));
+}
+function closeFullscreen(id){document.getElementById(id).classList.remove('show')}
+function openFullscreen(id){document.getElementById(id).classList.add('show')}
+
+// ===========================
+// SMS
+// ===========================
+let smsMemberId=null,smsCatIdx=0;
+function openSmsSheet(memberId){
+  smsMemberId=memberId;
+  const m=DB.members.find(x=>x.id===memberId);
+  if(!m){toast('교인 정보를 찾을 수 없습니다','error');return}
+  document.getElementById('sms-name').textContent=m.name+(m.position?' '+m.position:'');
+  document.getElementById('sms-phone').textContent=m.phone||'연락처 없음';
+  smsCatIdx=0;
+  document.getElementById('sms-text').value='';
+  updateSmsCount();
+  renderSmsCats();
+  openSheet('sheet-sms');
+}
+function renderSmsCats(){
+  const tabs=document.getElementById('sms-cat-tabs');
+  tabs.innerHTML=SMS_TEMPLATES.map((c,i)=>`<button class="sms-cat-pill${i===smsCatIdx?' active':''}" onclick="selectSmsCat(${i})">${c.icon} ${c.category}</button>`).join('');
+  renderSmsTpls();
+}
+function selectSmsCat(idx){
+  smsCatIdx=idx;
+  document.querySelectorAll('#sms-cat-tabs .sms-cat-pill').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  renderSmsTpls();
+}
+function renderSmsTpls(){
+  const cat=SMS_TEMPLATES[smsCatIdx];
+  const m=DB.members.find(x=>x.id===smsMemberId);
+  const name=m?m.name:'';
+  const list=document.getElementById('sms-tpl-list');
+  list.innerHTML=cat.templates.map((t,i)=>{
+    const preview=t.text.replace(/{이름}/g,name||'{이름}').split('\n')[0];
+    return `<div class="sms-tpl-item" onclick="applySmsTemplate(${smsCatIdx},${i},this)">
+      <div class="sti-label">${t.label}</div>
+      <div class="sti-preview">${esc(preview)}</div>
+    </div>`;
+  }).join('');
+}
+function applySmsTemplate(catIdx,tplIdx,el){
+  document.querySelectorAll('.sms-tpl-item').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  const m=DB.members.find(x=>x.id===smsMemberId);
+  const name=m?m.name:'';
+  const text=SMS_TEMPLATES[catIdx].templates[tplIdx].text.replace(/{이름}/g,name);
+  document.getElementById('sms-text').value=text;
+  updateSmsCount();
+}
+function updateSmsCount(){
+  const len=document.getElementById('sms-text').value.length;
+  const el=document.getElementById('sms-char-count');
+  el.textContent=len+'자'+(len>90?' (장문 MMS)':'');
+  el.className='sms-char-count'+(len>90?' warn':'');
+}
+function sendSms(){
+  const m=DB.members.find(x=>x.id===smsMemberId);
+  if(!m||!m.phone){toast('연락처가 없습니다','error');return}
+  const text=document.getElementById('sms-text').value.trim();
+  if(!text){toast('메시지를 입력하세요','error');return}
+  const phone=m.phone.replace(/-/g,'');
+  location.href=`sms:${phone}?body=${encodeURIComponent(text)}`;
+  closeSheet('sheet-sms');
+}
+function sendKakao(){
+  const text=document.getElementById('sms-text').value.trim();
+  if(!text){toast('메시지를 입력하세요','error');return}
+  // 클립보드 복사 후 카카오톡 실행
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      toast('메시지 복사 완료! 카카오톡에서 붙여넣기 하세요 😊','success');
+      setTimeout(()=>{location.href='kakaotalk://'},600);
+    }).catch(()=>_kakaoFallback(text));
+  } else {
+    _kakaoFallback(text);
+  }
+}
+function _kakaoFallback(text){
+  // 구형 방식 클립보드 복사
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('메시지 복사 완료! 카카오톡에서 붙여넣기 하세요 😊','success');}
+  catch{toast('카카오톡을 직접 열고 메시지를 붙여넣기 하세요','error');}
+  document.body.removeChild(ta);
+  setTimeout(()=>{location.href='kakaotalk://'},600);
+}
+
+// ===========================
+// ADD MENU
+// ===========================
+function showAddMenu(){openSheet('sheet-addmenu')}
+
+// ===========================
+// HOME
+// ===========================
+function renderHome(){
+  const ms=DB.members;
+  const active=ms.filter(m=>m.isActive!=='false'&&m.isActive!==false);
+  const month=thisMonth();
+  const txs=DB.finance;
+  const monthTxs=txs.filter(t=>t.date&&t.date.startsWith(month));
+  const monthIncome=monthTxs.filter(t=>t.txType==='income').reduce((s,t)=>s+Number(t.amount),0);
+  const monthExpense=monthTxs.filter(t=>t.txType==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  const totalBalance=txs.reduce((s,t)=>s+(t.txType==='income'?Number(t.amount):-Number(t.amount)),0);
+  const ongoingPrayers=DB.prayers.filter(p=>p.isAnswered!=='true'&&p.isAnswered!==true).length;
+  const todayBdays=active.filter(m=>isBdayToday(m.birthdate));
+  const weekBdays=active.filter(m=>isBdayThisWeek(m.birthdate)&&!isBdayToday(m.birthdate));
+
+  let html='';
+  // birthday banners
+  if(todayBdays.length){
+    html+=todayBdays.map(m=>`<div class="bday-banner"><div class="bb-icon">🎂</div><div class="bb-body"><h4>오늘 생일! ${esc(m.name)}</h4><p>${calcAge(m.birthdate)}세${m.phone?' · '+m.phone:''}</p></div></div>`).join('');
+  }
+  if(weekBdays.length){
+    html+=`<div class="bday-banner" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)"><div class="bb-icon">🎁</div><div class="bb-body"><h4>이번 주 생일 예정</h4><p>${weekBdays.map(m=>esc(m.name)).join(', ')}</p></div></div>`;
+  }
+
+  // stats
+  html+=`<div class="stats-row">
+    <div class="stat-box"><div class="sb-label">전체 교인</div><div class="sb-val">${ms.length}명</div><div class="sb-sub">활동 ${active.length}명</div></div>
+    <div class="stat-box"><div class="sb-label">누적 잔액</div><div class="sb-val" style="color:var(--primary)">${(totalBalance/10000).toFixed(0)}만원</div><div class="sb-sub">합계</div></div>
+    <div class="stat-box"><div class="sb-label">이달 수입</div><div class="sb-val" style="color:var(--success)">${(monthIncome/10000).toFixed(0)}만원</div><div class="sb-sub">${month.slice(5)}월</div></div>
+    <div class="stat-box"><div class="sb-label">이달 지출</div><div class="sb-val" style="color:var(--danger)">${(monthExpense/10000).toFixed(0)}만원</div><div class="sb-sub">${month.slice(5)}월</div></div>
+    <div class="stat-box"><div class="sb-label">기도 중</div><div class="sb-val">${ongoingPrayers}건</div><div class="sb-sub">미응답</div></div>
+    <div class="stat-box"><div class="sb-label">이달 생일</div><div class="sb-val">${active.filter(m=>isBdayThisMonth(m.birthdate)).length}명</div><div class="sb-sub">${month.slice(5)}월</div></div>
+  </div>`;
+
+  // quick actions
+  html+=`<div class="sec-title">빠른 메뉴</div>
+  <div class="qa-grid">
+    <div class="qa-item" onclick="navTo('members',document.querySelectorAll('.nav-item')[1])"><div class="qa-icon">👥</div><div class="qa-label">교인관리</div></div>
+    <div class="qa-item" onclick="openFinanceSheet('income')"><div class="qa-icon">💰</div><div class="qa-label">헌금입력</div></div>
+    <div class="qa-item" onclick="openFinanceSheet('expense')"><div class="qa-icon">📤</div><div class="qa-label">지출입력</div></div>
+    <div class="qa-item" onclick="openVisitSheet()"><div class="qa-icon">🚗</div><div class="qa-label">심방기록</div></div>
+    <div class="qa-item" onclick="openPrayerSheet()"><div class="qa-icon">🙏</div><div class="qa-label">기도제목</div></div>
+    <div class="qa-item" onclick="navTo('attendance',document.querySelectorAll('.nav-item')[4])"><div class="qa-icon">📋</div><div class="qa-label">출석체크</div></div>
+    <div class="qa-item" onclick="exportAll()"><div class="qa-icon">📊</div><div class="qa-label">Excel저장</div></div>
+    <div class="qa-item" onclick="openMemberSheet()"><div class="qa-icon">➕</div><div class="qa-label">교인등록</div></div>
+    <div class="qa-item" onclick="openBulkSmsSheet()"><div class="qa-icon">📢</div><div class="qa-label">단체문자</div></div>
+    <div class="qa-item" onclick="openImportSheet()"><div class="qa-icon">📥</div><div class="qa-label">엑셀가져오기</div></div>
+  </div>`;
+
+  // upcoming visits
+  const upVisits=DB.visitations.filter(v=>v.nextDate&&v.nextDate>=today()).sort((a,b)=>a.nextDate.localeCompare(b.nextDate)).slice(0,3);
+  if(upVisits.length){
+    html+=`<div class="sec-title">🗓 심방 예정</div><div class="list-card">`;
+    upVisits.forEach(v=>{html+=`<div class="list-item" onclick="">
+      <div class="avatar" style="background:var(--purple-bg)">🚗</div>
+      <div class="li-body"><div class="li-name">${esc(v.memberName)}</div><div class="li-sub">${fmtDate(v.nextDate)} · ${esc(v.purpose)}</div></div>
+    </div>`});
+    html+=`</div>`;
+  }
+
+  // recent transactions
+  const recentTx=txs.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  if(recentTx.length){
+    html+=`<div class="sec-title">최근 재정 내역</div><div class="list-card">`;
+    recentTx.forEach(t=>{html+=`<div class="tx-item">
+      <div class="tx-icon ${t.txType}">${CAT_ICONS[t.category]||'💵'}</div>
+      <div class="tx-body"><div class="tx-name">${esc(t.category)}</div><div class="tx-sub">${fmtDate(t.date)} ${t.memberName?'· '+esc(t.memberName):''}</div></div>
+      <div class="tx-amount ${t.txType}">${t.txType==='income'?'+':'-'}${fmtMoney(t.amount)}</div>
+    </div>`});
+    html+=`</div>`;
+  }
+
+  // this month birthdays
+  const monthBdays=active.filter(m=>isBdayThisMonth(m.birthdate)).sort((a,b)=>new Date(a.birthdate).getDate()-new Date(b.birthdate).getDate());
+  if(monthBdays.length){
+    html+=`<div class="sec-title">🎂 이번 달 생일</div><div class="list-card">`;
+    monthBdays.forEach(m=>{html+=`<div class="list-item" onclick="openProfile('${m.id}')">
+      <div class="avatar" style="background:${m.gender==='여'?'#FCE4EC':'#E3F2FD'}">${m.gender==='여'?'👩':'👨'}</div>
+      <div class="li-body"><div class="li-name">${esc(m.name)}${isBdayToday(m.birthdate)?' 🎂':''}</div><div class="li-sub">${fmtDate(m.birthdate)} · ${calcAge(m.birthdate)||''}세</div></div>
+      ${m.phone?`<div class="li-right" style="display:flex;gap:4px;align-items:center;flex-shrink:0"><a href="tel:${m.phone}" style="color:var(--primary);font-size:18px;line-height:1;padding:4px" onclick="event.stopPropagation()">📞</a><button onclick="event.stopPropagation();openSmsSheet('${m.id}')" style="font-size:16px;line-height:1;padding:4px;border:none;background:none;cursor:pointer">💬</button></div>`:''}
+    </div>`});
+    html+=`</div>`;
+  }
+
+  document.getElementById('home-content').innerHTML=html;
+}
+
+// ===========================
+// MEMBERS
+// ===========================
+let mFilter='all';
+function setMFilter(f,el){
+  mFilter=f;
+  document.querySelectorAll('#m-filter-row .filter-pill').forEach(p=>p.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderMembers();
+}
+function clearSearch(){document.getElementById('m-search').value='';document.getElementById('m-clear').style.display='none';renderMembers()}
+
+function renderMembers(){
+  const q=(document.getElementById('m-search').value||'').trim().toLowerCase();
+  document.getElementById('m-clear').style.display=q?'block':'none';
+  let ms=DB.members;
+  if(mFilter!=='all')ms=ms.filter(m=>m.department===mFilter);
+  if(q)ms=ms.filter(m=>(m.name||'').toLowerCase().includes(q)||(m.phone||'').includes(q)||(m.address||'').toLowerCase().includes(q)||(m.phone2||'').includes(q)||(m.email||'').toLowerCase().includes(q)||(m.position||'').includes(q)||(m.district||'').includes(q)||(m.familyGroup||'').includes(q)||(m.memo||'').toLowerCase().includes(q));
+  const el=document.getElementById('members-list');
+  if(!ms.length){el.innerHTML='<div class="empty"><div class="empty-icon">👥</div><p>등록된 교인이 없습니다<br>+ 버튼으로 교인을 등록하세요</p></div>';return}
+  el.innerHTML='<div class="list-card" style="margin:0 12px 80px">'+ms.map(m=>`
+    <div class="list-item" onclick="openProfile('${m.id}')">
+      <div class="avatar" style="background:${m.gender==='여'?'#FCE4EC':'#E3F2FD'}">${m.gender==='여'?'👩':'👨'}</div>
+      <div class="li-body">
+        <div class="li-name">${esc(m.name)}${isBdayToday(m.birthdate)?' 🎂':''}</div>
+        <div class="li-sub">${[m.position,m.department,m.district].filter(Boolean).join(' · ')}</div>
+        ${q&&m.address?`<div class="li-sub" style="color:var(--text3)">📍 ${esc(m.address)}</div>`:''}
+        ${q&&m.memo?`<div class="li-sub" style="color:var(--text3)">📝 ${esc(m.memo).slice(0,40)}${m.memo.length>40?'...':''}</div>`:''}
+      </div>
+      <div class="li-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${m.phone?`<a href="tel:${m.phone}" style="font-size:20px;line-height:1" onclick="event.stopPropagation()">📞</a>`:''}
+        ${m.isActive==='false'||m.isActive===false?'<span class="chip chip-gray">비활동</span>':''}
+      </div>
+    </div>`).join('')+'</div>';
+}
+
+// ===========================
+// MEMBER SHEET
+// ===========================
+let editingMemberId=null;
+function openMemberSheet(id){
+  editingMemberId=id||null;
+  document.getElementById('member-sheet-title').textContent=id?'교인 수정':'교인 등록';
+  const ps=document.getElementById('mf-pos');
+  ps.innerHTML=POSITIONS.map(p=>`<option>${p}</option>`).join('');
+  const ds=document.getElementById('mf-dept');
+  ds.innerHTML=DEPARTMENTS.map(d=>`<option>${d}</option>`).join('');
+  const fields={name:'mf-name',gender:'mf-gender',birthdate:'mf-birth',phone:'mf-phone',phone2:'mf-phone2',email:'mf-email',address:'mf-addr',position:'mf-pos',department:'mf-dept',district:'mf-district',familyGroup:'mf-family',registrationDate:'mf-regdate',baptismDate:'mf-baptism',isActive:'mf-active',memo:'mf-memo'};
+  if(id){
+    const m=DB.members.find(x=>x.id===id);
+    if(m)Object.entries(fields).forEach(([k,fid])=>{const el=document.getElementById(fid);if(el)el.value=m[k]||''});
+  } else {
+    Object.values(fields).forEach(fid=>{const el=document.getElementById(fid);if(el)el.value=''});
+    document.getElementById('mf-regdate').value=today();
+    document.getElementById('mf-active').value='true';
+    document.getElementById('mf-pos').value='성도';
+  }
+  openSheet('sheet-member');
+}
+
+function saveMember(){
+  const name=document.getElementById('mf-name').value.trim();
+  if(!name){toast('이름을 입력하세요','error');return}
+  const data={name,gender:document.getElementById('mf-gender').value,birthdate:document.getElementById('mf-birth').value,phone:document.getElementById('mf-phone').value,phone2:document.getElementById('mf-phone2').value,email:document.getElementById('mf-email').value,address:document.getElementById('mf-addr').value,position:document.getElementById('mf-pos').value,department:document.getElementById('mf-dept').value,district:document.getElementById('mf-district').value,familyGroup:document.getElementById('mf-family').value,registrationDate:document.getElementById('mf-regdate').value,baptismDate:document.getElementById('mf-baptism').value,isActive:document.getElementById('mf-active').value,memo:document.getElementById('mf-memo').value};
+  let ms=DB.members;
+  if(editingMemberId){const i=ms.findIndex(x=>x.id===editingMemberId);if(i>=0)ms[i]={...ms[i],...data}}
+  else ms.push({id:DB.id(),...data});
+  DB.members=ms;
+  closeSheet('sheet-member');
+  if(currentPage==='members')renderMembers();
+  if(currentPage==='home')renderHome();
+  toast(editingMemberId?'수정되었습니다':'등록되었습니다');
+}
+
+function deleteMember(id){
+  if(!confirm('교인을 삭제하시겠습니까?'))return;
+  DB.members=DB.members.filter(m=>m.id!==id);
+  closeFullscreen('fs-profile');
+  if(currentPage==='members')renderMembers();
+  renderHome();
+  toast('삭제되었습니다');
+}
+
+// ===========================
+// MEMBER PROFILE
+// ===========================
+let profileId=null,profileTab='info';
+function openProfile(id){
+  profileId=id;
+  const m=DB.members.find(x=>x.id===id);
+  if(!m)return;
+  document.getElementById('fs-profile-name').textContent=m.name;
+  document.getElementById('fs-profile-edit').onclick=()=>{closeFullscreen('fs-profile');openMemberSheet(id)};
+  document.getElementById('fs-profile-del').onclick=()=>deleteMember(id);
+  setProfileTab('info');
+  openFullscreen('fs-profile');
+}
+
+function setProfileTab(tab,el){
+  profileTab=tab;
+  document.querySelectorAll('#fs-profile .tab-btn').forEach((b,i)=>{b.classList.remove('active')});
+  if(el)el.classList.add('active');
+  else document.querySelector('#fs-profile .tab-btn').classList.add('active');
+  renderProfileTab();
+}
+
+function renderProfileTab(){
+  const id=profileId;
+  const m=DB.members.find(x=>x.id===id);
+  if(!m)return;
+  const el=document.getElementById('fs-profile-content');
+  if(profileTab==='info'){
+    const age=calcAge(m.birthdate);
+    el.innerHTML=`
+      <div class="profile-hero">
+        <div class="profile-avatar">${m.gender==='여'?'👩':'👨'}</div>
+        <div class="profile-name">${esc(m.name)}</div>
+        <div class="profile-sub">${[m.position,m.department,m.district].filter(Boolean).join(' · ')||'성도'}</div>
+        <div class="profile-actions">
+          ${m.phone?`<a href="tel:${m.phone}" class="pa-btn">📞 전화</a>`:''}
+          ${m.phone?`<button onclick="openSmsSheet('${id}')" class="pa-btn">💬 문자</button>`:''}
+          ${m.email?`<a href="mailto:${m.email}" class="pa-btn">📧 메일</a>`:''}
+        </div>
+      </div>
+      <div class="sec-title">기본 정보</div>
+      <div class="info-list">
+        ${m.birthdate?`<div class="info-row"><div class="ir-label">생년월일</div><div class="ir-val">${fmtDateKo(m.birthdate)}${age?` (${age}세)`:''}</div></div>`:''}
+        ${m.gender?`<div class="info-row"><div class="ir-label">성별</div><div class="ir-val">${m.gender}</div></div>`:''}
+        ${m.phone?`<div class="info-row"><div class="ir-label">연락처</div><div class="ir-val"><a href="tel:${m.phone}" style="color:var(--primary)">${m.phone}</a></div></div>`:''}
+        ${m.phone2?`<div class="info-row"><div class="ir-label">비상 연락처</div><div class="ir-val"><a href="tel:${m.phone2}" style="color:var(--primary)">${m.phone2}</a></div></div>`:''}
+        ${m.email?`<div class="info-row"><div class="ir-label">이메일</div><div class="ir-val">${esc(m.email)}</div></div>`:''}
+        ${m.address?`<div class="info-row"><div class="ir-label">주소</div><div class="ir-val">${esc(m.address)}</div></div>`:''}
+      </div>
+      <div class="sec-title">교회 정보</div>
+      <div class="info-list">
+        ${m.position?`<div class="info-row"><div class="ir-label">직분</div><div class="ir-val"><span class="chip chip-blue">${esc(m.position)}</span></div></div>`:''}
+        ${m.department?`<div class="info-row"><div class="ir-label">부서</div><div class="ir-val">${esc(m.department)}</div></div>`:''}
+        ${m.district?`<div class="info-row"><div class="ir-label">구역</div><div class="ir-val">${esc(m.district)}</div></div>`:''}
+        ${m.familyGroup?`<div class="info-row"><div class="ir-label">가족그룹</div><div class="ir-val">${esc(m.familyGroup)}</div></div>`:''}
+        ${m.registrationDate?`<div class="info-row"><div class="ir-label">등록일</div><div class="ir-val">${fmtDateKo(m.registrationDate)}</div></div>`:''}
+        ${m.baptismDate?`<div class="info-row"><div class="ir-label">세례일</div><div class="ir-val">${fmtDateKo(m.baptismDate)}</div></div>`:''}
+        <div class="info-row"><div class="ir-label">상태</div><div class="ir-val"><span class="chip ${m.isActive==='false'||m.isActive===false?'chip-gray':'chip-green'}">${m.isActive==='false'||m.isActive===false?'비활동':'활동중'}</span></div></div>
+      </div>
+      ${m.memo?`<div class="sec-title">목회 노트</div><div style="padding:0 12px 20px"><div class="note-box">${esc(m.memo)}</div></div>`:''}`;
+  }
+  if(profileTab==='finance'){
+    const txs=DB.finance.filter(t=>t.memberId===id&&t.txType==='income').sort((a,b)=>b.date.localeCompare(a.date));
+    const total=txs.reduce((s,t)=>s+Number(t.amount),0);
+    el.innerHTML=`<div style="padding:12px 12px 0">
+      <div class="card-sm" style="background:var(--success-bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:0">
+        <div style="font-size:12px;color:var(--success);font-weight:700">누적 헌금 합계</div>
+        <div style="font-size:26px;font-weight:700;color:var(--success)">${fmtMoney(total)}</div>
+        <div style="font-size:12px;color:#555;margin-top:2px">총 ${txs.length}건</div>
+      </div></div>`+
+      (txs.length?`<div class="list-card">`+txs.map(t=>`<div class="tx-item">
+        <div class="tx-icon income">${CAT_ICONS[t.category]||'💰'}</div>
+        <div class="tx-body"><div class="tx-name">${esc(t.category)}</div><div class="tx-sub">${fmtDate(t.date)} · ${t.method||''}</div></div>
+        <div class="tx-amount income">+${fmtMoney(t.amount)}</div>
+      </div>`).join('')+'</div>'
+      :`<div class="empty"><div class="empty-icon">💰</div><p>헌금 내역이 없습니다</p></div>`);
+  }
+  if(profileTab==='visit'){
+    const vs=DB.visitations.filter(v=>v.memberId===id).sort((a,b)=>b.date.localeCompare(a.date));
+    el.innerHTML=`<div style="padding:12px 12px 4px"><button class="btn btn-primary btn-sm" onclick="openVisitSheet(null,'${id}')">+ 심방 기록 추가</button></div>`+
+      (vs.length?vs.map(v=>`<div class="card" style="margin:8px 12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span class="chip chip-purple">${esc(v.purpose)}</span>
+          <span style="font-size:13px;color:var(--text3)">${fmtDate(v.date)}</span>
+        </div>
+        ${v.content?`<div style="font-size:14px;color:var(--text);margin-bottom:8px;white-space:pre-wrap">${esc(v.content)}</div>`:''}
+        ${v.prayer?`<div style="font-size:13px;color:var(--text2);background:#F8F9FA;border-radius:8px;padding:8px 10px">🙏 ${esc(v.prayer)}</div>`:''}
+        ${v.nextDate?`<div style="font-size:12px;color:var(--primary);margin-top:8px">다음 심방: ${fmtDate(v.nextDate)}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="openVisitSheet('${v.id}')">수정</button>
+          <button class="btn btn-sm" style="color:var(--danger);background:var(--danger-bg)" onclick="deleteVisit('${v.id}')">삭제</button>
+        </div>
+      </div>`).join('')
+      :`<div class="empty"><div class="empty-icon">🚗</div><p>심방 기록이 없습니다</p></div>`);
+  }
+  if(profileTab==='prayer'){
+    const ps=DB.prayers.filter(p=>p.memberId===id).sort((a,b)=>b.startDate.localeCompare(a.startDate));
+    el.innerHTML=`<div style="padding:12px 12px 4px"><button class="btn btn-primary btn-sm" onclick="openPrayerSheet(null,'${id}')">+ 기도 제목 추가</button></div>`+
+      (ps.length?ps.map(p=>`<div class="card" style="margin:8px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <span class="chip ${p.isAnswered==='true'||p.isAnswered===true?'chip-green':'chip-blue'}">${p.isAnswered==='true'||p.isAnswered===true?'✓ 응답됨':'기도중'}</span>
+          <span style="font-size:12px;color:var(--text3)">${fmtDate(p.startDate)}</span>
+        </div>
+        <div style="font-size:14px;color:var(--text);white-space:pre-wrap;margin-bottom:8px">${esc(p.content)}</div>
+        ${p.answeredDate?`<div style="font-size:12px;color:var(--success)">응답일: ${fmtDate(p.answeredDate)}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:10px">
+          ${p.isAnswered!=='true'&&p.isAnswered!==true?`<button class="btn btn-success btn-sm" onclick="markAnswered('${p.id}')">✓ 응답</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="openPrayerSheet('${p.id}')">수정</button>
+          <button class="btn btn-sm" style="color:var(--danger);background:var(--danger-bg)" onclick="deletePrayer('${p.id}')">삭제</button>
+        </div>
+      </div>`).join('')
+      :`<div class="empty"><div class="empty-icon">🙏</div><p>기도 제목이 없습니다</p></div>`);
+  }
+  if(profileTab==='attend'){
+    const allAtt=DB.attendance;
+    const sundays=[];
+    for(let i=11;i>=0;i--){const d=new Date();d.setDate(d.getDate()-d.getDay()-i*7);sundays.push(d.toISOString().slice(0,10))}
+    const statMap={'present':'출석','absent':'결석','online':'온라인'};
+    const present=sundays.filter(s=>{const r=allAtt[s]||{};return r[id]==='present'||r[id]==='online'}).length;
+    el.innerHTML=`<div style="padding:12px 12px 4px">
+      <div class="card-sm" style="background:var(--primary-light);border-radius:var(--radius-sm);padding:16px;margin-bottom:0">
+        <div style="font-size:12px;color:var(--primary);font-weight:700">최근 12주 출석률</div>
+        <div style="font-size:26px;font-weight:700;color:var(--primary)">${Math.round(present/12*100)}%</div>
+        <div style="font-size:12px;color:#555">${present}/12주 출석</div>
+      </div></div>
+      <div class="sec-title">주일별 출석 내역</div>
+      <div class="list-card">`+
+      sundays.reverse().map(s=>{const r=allAtt[s]||{};const st=r[id];return `<div class="info-row"><div class="ir-label">${s.slice(5)}</div><div class="ir-val"><span class="chip ${st==='present'?'chip-green':st==='absent'?'chip-red':st==='online'?'chip-blue':'chip-gray'}">${statMap[st]||'-'}</span></div></div>`}).join('')+
+      '</div>';
+  }
+}
+
+// ===========================
+// FINANCE
+// ===========================
+let financeTab='all';
+function renderFinance(){
+  const txs=DB.finance;
+  const month=thisMonth();
+  const monthTxs=txs.filter(t=>t.date&&t.date.startsWith(month));
+  const totalBalance=txs.reduce((s,t)=>s+(t.txType==='income'?Number(t.amount):-Number(t.amount)),0);
+  const monthIncome=monthTxs.filter(t=>t.txType==='income').reduce((s,t)=>s+Number(t.amount),0);
+  const monthExpense=monthTxs.filter(t=>t.txType==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  let html=`<div class="finance-hero">
+    <div class="fh-label">총 잔액</div>
+    <div class="fh-amount">${fmtMoney(totalBalance)}</div>
+    <div class="fh-row">
+      <div class="fh-item"><div class="fh-item-label">이번달 수입</div><div class="fh-item-val income">+${fmtMoney(monthIncome)}</div></div>
+      <div class="fh-item" style="text-align:right"><div class="fh-item-label">이번달 지출</div><div class="fh-item-val expense">-${fmtMoney(monthExpense)}</div></div>
+    </div>
+  </div>`;
+
+  // income breakdown
+  const incomeBycat={};
+  INCOME_CATS.forEach(c=>{incomeBycat[c]=monthTxs.filter(t=>t.txType==='income'&&t.category===c).reduce((s,t)=>s+Number(t.amount),0)});
+  const topIncome=Object.entries(incomeBycat).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  if(topIncome.length){
+    html+=`<div class="sec-title">이번달 수입 분류</div><div class="card">`;
+    topIncome.forEach(([cat,amt])=>{const pct=monthIncome?Math.round(amt/monthIncome*100):0;html+=`<div class="chart-item"><div class="ci-top"><div class="ci-label">${CAT_ICONS[cat]||'💵'} ${cat}</div><div class="ci-val">${fmtMoney(amt)}</div></div><div class="ci-bar-bg"><div class="ci-bar-fill" style="width:${pct}%;background:var(--success)"></div></div></div>`});
+    html+=`</div>`;
+  }
+
+  // expense breakdown
+  const expBycat={};
+  EXPENSE_CATS.forEach(c=>{expBycat[c]=monthTxs.filter(t=>t.txType==='expense'&&t.category===c).reduce((s,t)=>s+Number(t.amount),0)});
+  const topExp=Object.entries(expBycat).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  if(topExp.length){
+    html+=`<div class="sec-title">이번달 지출 분류</div><div class="card">`;
+    topExp.forEach(([cat,amt])=>{const pct=monthExpense?Math.round(amt/monthExpense*100):0;html+=`<div class="chart-item"><div class="ci-top"><div class="ci-label">${CAT_ICONS[cat]||'📦'} ${cat}</div><div class="ci-val">${fmtMoney(amt)}</div></div><div class="ci-bar-bg"><div class="ci-bar-fill" style="width:${pct}%;background:var(--danger)"></div></div></div>`});
+    html+=`</div>`;
+  }
+
+  // filter
+  html+=`<div class="sec-title">전체 내역</div>
+  <div class="seg-ctrl"><button class="seg-btn ${financeTab==='all'?'active':''}" onclick="setFinTab('all',this)">전체</button><button class="seg-btn ${financeTab==='income'?'active':''}" onclick="setFinTab('income',this)">수입</button><button class="seg-btn ${financeTab==='expense'?'active':''}" onclick="setFinTab('expense',this)">지출</button></div>
+  <div class="list-card" id="finance-tx-list">`;
+  const filtered=txs.filter(t=>financeTab==='all'||t.txType===financeTab).sort((a,b)=>b.date.localeCompare(a.date));
+  if(filtered.length){
+    filtered.forEach(t=>{html+=`<div class="tx-item">
+      <div class="tx-icon ${t.txType}">${CAT_ICONS[t.category]||'💵'}</div>
+      <div class="tx-body"><div class="tx-name">${esc(t.category)}</div><div class="tx-sub">${fmtDate(t.date)} ${t.memberName?'· '+esc(t.memberName):''} ${t.description?'· '+esc(t.description):''}</div></div>
+      <div>
+        <div class="tx-amount ${t.txType}">${t.txType==='income'?'+':'-'}${fmtMoney(t.amount)}</div>
+        <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:#F0F0F0;color:var(--text2)" onclick="openFinanceSheet('${t.txType}','${t.id}')">수정</button>
+          <button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:var(--danger-bg);color:var(--danger)" onclick="deleteFinance('${t.id}')">삭제</button>
+        </div>
+      </div>
+    </div>`});
+  } else {html+='<div class="empty"><div class="empty-icon">💰</div><p>내역이 없습니다</p></div>'}
+  html+='</div>';
+  document.getElementById('finance-content').innerHTML=html;
+}
+
+function setFinTab(tab,el){
+  financeTab=tab;
+  document.querySelectorAll('#page-finance .seg-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderFinance();
+}
+
+let editingFinanceId=null,financeType='income';
+function openFinanceSheet(type,id){
+  editingFinanceId=id||null;
+  financeType=type==='expense'?'expense':'income';
+  document.getElementById('finance-sheet-title').textContent=editingFinanceId?'재정 수정':(type==='expense'?'지출 등록':'수입 등록');
+  // seg
+  document.getElementById('ft-income-btn').classList.toggle('active',financeType==='income');
+  document.getElementById('ft-expense-btn').classList.toggle('active',financeType==='expense');
+  updateFinanceCats();
+  // populate member select
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false).sort((a,b)=>a.name.localeCompare(b.name));
+  const msel=document.getElementById('ff-member');
+  msel.innerHTML='<option value="">익명/무기명</option>'+ms.map(m=>`<option value="${m.id}">${esc(m.name)}${m.position?' ('+m.position+')':''}</option>`).join('');
+  document.getElementById('ff-member-fg').style.display=financeType==='income'?'flex':'none';
+  if(id){
+    const t=DB.finance.find(x=>x.id===id);
+    if(t){
+      setFinanceType(t.txType);
+      document.getElementById('ff-date').value=t.date;
+      document.getElementById('ff-cat').value=t.category;
+      document.getElementById('ff-member').value=t.memberId||'';
+      document.getElementById('ff-amount').value=t.amount;
+      document.getElementById('ff-method').value=t.method||'현금';
+      document.getElementById('ff-desc').value=t.description||'';
+    }
+  } else {
+    document.getElementById('ff-date').value=today();
+    document.getElementById('ff-amount').value='';
+    document.getElementById('ff-member').value='';
+    document.getElementById('ff-method').value='현금';
+    document.getElementById('ff-desc').value='';
+  }
+  openSheet('sheet-finance');
+}
+
+function setFinanceType(type){
+  financeType=type;
+  document.getElementById('ft-income-btn').classList.toggle('active',type==='income');
+  document.getElementById('ft-expense-btn').classList.toggle('active',type==='expense');
+  document.getElementById('ff-member-fg').style.display=type==='income'?'flex':'none';
+  updateFinanceCats();
+}
+
+function updateFinanceCats(){
+  const cats=financeType==='income'?INCOME_CATS:EXPENSE_CATS;
+  document.getElementById('ff-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+function saveFinance(){
+  const date=document.getElementById('ff-date').value;
+  const amount=document.getElementById('ff-amount').value;
+  const cat=document.getElementById('ff-cat').value;
+  if(!date||!amount||!cat){toast('날짜, 분류, 금액을 입력하세요','error');return}
+  const memberId=document.getElementById('ff-member').value;
+  const m=memberId?DB.members.find(x=>x.id===memberId):null;
+  const data={txType:financeType,date,category:cat,memberId:memberId||null,memberName:m?m.name:null,amount:Number(amount),method:document.getElementById('ff-method').value,description:document.getElementById('ff-desc').value};
+  let txs=DB.finance;
+  if(editingFinanceId){const i=txs.findIndex(x=>x.id===editingFinanceId);if(i>=0)txs[i]={...txs[i],...data}}
+  else txs.push({id:DB.id(),...data});
+  DB.finance=txs;
+  closeSheet('sheet-finance');
+  if(currentPage==='finance')renderFinance();
+  if(currentPage==='home')renderHome();
+  toast(editingFinanceId?'수정되었습니다':'등록되었습니다');
+}
+
+function deleteFinance(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  DB.finance=DB.finance.filter(t=>t.id!==id);
+  renderFinance();
+  toast('삭제되었습니다');
+}
+
+// ===========================
+// VISITATION & PRAYER (Ministry)
+// ===========================
+let ministryTab='visitation';
+function setMinistryTab(tab,el){
+  ministryTab=tab;
+  document.querySelectorAll('#page-ministry .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderMinistry();
+}
+
+function renderMinistry(){
+  const el=document.getElementById('ministry-content');
+  if(ministryTab==='visitation'){
+    const vs=DB.visitations.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!vs.length){el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div><p>심방 기록이 없습니다</p></div>';return}
+    el.innerHTML=vs.map(v=>`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div><div style="font-size:16px;font-weight:700">${esc(v.memberName)}</div><div style="font-size:13px;color:var(--text2);margin-top:2px">${fmtDate(v.date)}</div></div>
+        <span class="chip chip-purple">${esc(v.purpose)}</span>
+      </div>
+      ${v.content?`<div style="font-size:14px;color:var(--text);white-space:pre-wrap;margin-bottom:8px">${esc(v.content)}</div>`:''}
+      ${v.prayer?`<div style="font-size:13px;color:var(--text2);background:#F8F9FA;border-radius:8px;padding:8px 10px;margin-bottom:8px">🙏 ${esc(v.prayer)}</div>`:''}
+      ${v.nextDate?`<div style="font-size:13px;color:var(--primary)">📅 다음 심방: ${fmtDate(v.nextDate)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="openVisitSheet('${v.id}')">수정</button>
+        <button class="btn btn-sm" style="color:var(--danger);background:var(--danger-bg)" onclick="deleteVisit('${v.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+  } else {
+    const ps=DB.prayers.sort((a,b)=>b.startDate.localeCompare(a.startDate));
+    if(!ps.length){el.innerHTML='<div class="empty"><div class="empty-icon">🙏</div><p>기도 제목이 없습니다</p></div>';return}
+    el.innerHTML=ps.map(p=>`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div><div style="font-size:15px;font-weight:700">${p.memberName?esc(p.memberName):'🏛️ 공동체'}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${fmtDate(p.startDate)}</div></div>
+        <span class="chip ${p.isAnswered==='true'||p.isAnswered===true?'chip-green':'chip-blue'}">${p.isAnswered==='true'||p.isAnswered===true?'✓ 응답됨':'기도중'}</span>
+      </div>
+      <div style="font-size:14px;color:var(--text);white-space:pre-wrap;margin-bottom:8px">${esc(p.content)}</div>
+      ${p.answeredDate?`<div style="font-size:12px;color:var(--success)">✓ 응답일: ${fmtDate(p.answeredDate)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        ${p.isAnswered!=='true'&&p.isAnswered!==true?`<button class="btn btn-success btn-sm" onclick="markAnswered('${p.id}')">✓ 응답</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="openPrayerSheet('${p.id}')">수정</button>
+        <button class="btn btn-sm" style="color:var(--danger);background:var(--danger-bg)" onclick="deletePrayer('${p.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+  }
+}
+
+function openMinistrySheet(){
+  if(ministryTab==='visitation')openVisitSheet();
+  else openPrayerSheet();
+}
+
+// Visit sheet
+let editingVisitId=null;
+function openVisitSheet(id,prefillMemberId){
+  editingVisitId=id||null;
+  document.getElementById('visit-sheet-title').textContent=id?'심방 수정':'심방 기록';
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false).sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('vf-member').innerHTML='<option value="">선택하세요</option>'+ms.map(m=>`<option value="${m.id}">${esc(m.name)}${m.position?' ('+m.position+')':''}</option>`).join('');
+  if(id){
+    const v=DB.visitations.find(x=>x.id===id);
+    if(v){document.getElementById('vf-date').value=v.date;document.getElementById('vf-member').value=v.memberId||'';document.getElementById('vf-purpose').value=v.purpose||'정기심방';document.getElementById('vf-content').value=v.content||'';document.getElementById('vf-prayer').value=v.prayer||'';document.getElementById('vf-next').value=v.nextDate||'';document.getElementById('vf-notes').value=v.notes||''}
+  } else {
+    document.getElementById('vf-date').value=today();
+    document.getElementById('vf-member').value=prefillMemberId||'';
+    document.getElementById('vf-purpose').value='정기심방';
+    ['vf-content','vf-prayer','vf-next','vf-notes'].forEach(id=>document.getElementById(id).value='');
+  }
+  openSheet('sheet-visit');
+}
+
+function saveVisit(){
+  const date=document.getElementById('vf-date').value;
+  const memberId=document.getElementById('vf-member').value;
+  if(!date||!memberId){toast('날짜와 교인을 선택하세요','error');return}
+  const m=DB.members.find(x=>x.id===memberId);
+  const data={memberId,memberName:m?m.name:memberId,date,purpose:document.getElementById('vf-purpose').value,content:document.getElementById('vf-content').value,prayer:document.getElementById('vf-prayer').value,nextDate:document.getElementById('vf-next').value,notes:document.getElementById('vf-notes').value};
+  let vs=DB.visitations;
+  if(editingVisitId){const i=vs.findIndex(x=>x.id===editingVisitId);if(i>=0)vs[i]={...vs[i],...data}}
+  else vs.push({id:DB.id(),...data});
+  DB.visitations=vs;
+  closeSheet('sheet-visit');
+  if(currentPage==='ministry')renderMinistry();
+  if(currentPage==='home')renderHome();
+  if(profileId&&profileTab==='visit')renderProfileTab();
+  toast(editingVisitId?'수정되었습니다':'심방이 기록되었습니다');
+}
+
+function deleteVisit(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  DB.visitations=DB.visitations.filter(v=>v.id!==id);
+  if(currentPage==='ministry')renderMinistry();
+  if(profileId&&profileTab==='visit')renderProfileTab();
+  toast('삭제되었습니다');
+}
+
+// Prayer sheet
+let editingPrayerId=null;
+function openPrayerSheet(id,prefillMemberId){
+  editingPrayerId=id||null;
+  document.getElementById('prayer-sheet-title').textContent=id?'기도 제목 수정':'기도 제목 등록';
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false).sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('pf-member').innerHTML='<option value="">공동체 기도제목</option>'+ms.map(m=>`<option value="${m.id}">${esc(m.name)}${m.position?' ('+m.position+')':''}</option>`).join('');
+  if(id){
+    const p=DB.prayers.find(x=>x.id===id);
+    if(p){document.getElementById('pf-date').value=p.startDate;document.getElementById('pf-member').value=p.memberId||'';document.getElementById('pf-content').value=p.content||'';document.getElementById('pf-answered').value=String(p.isAnswered||'false');document.getElementById('pf-ansdate').value=p.answeredDate||'';document.getElementById('pf-notes').value=p.notes||''}
+  } else {
+    document.getElementById('pf-date').value=today();
+    document.getElementById('pf-member').value=prefillMemberId||'';
+    ['pf-content','pf-ansdate','pf-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('pf-answered').value='false';
+  }
+  openSheet('sheet-prayer');
+}
+
+function savePrayer(){
+  const content=document.getElementById('pf-content').value.trim();
+  if(!content){toast('기도 내용을 입력하세요','error');return}
+  const memberId=document.getElementById('pf-member').value;
+  const m=memberId?DB.members.find(x=>x.id===memberId):null;
+  const data={memberId:memberId||null,memberName:m?m.name:null,startDate:document.getElementById('pf-date').value,content,isAnswered:document.getElementById('pf-answered').value,answeredDate:document.getElementById('pf-ansdate').value,notes:document.getElementById('pf-notes').value};
+  let ps=DB.prayers;
+  if(editingPrayerId){const i=ps.findIndex(x=>x.id===editingPrayerId);if(i>=0)ps[i]={...ps[i],...data}}
+  else ps.push({id:DB.id(),...data});
+  DB.prayers=ps;
+  closeSheet('sheet-prayer');
+  if(currentPage==='ministry')renderMinistry();
+  if(profileId&&profileTab==='prayer')renderProfileTab();
+  toast(editingPrayerId?'수정되었습니다':'등록되었습니다');
+}
+
+function deletePrayer(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  DB.prayers=DB.prayers.filter(p=>p.id!==id);
+  if(currentPage==='ministry')renderMinistry();
+  if(profileId&&profileTab==='prayer')renderProfileTab();
+  toast('삭제되었습니다');
+}
+
+function markAnswered(id){
+  const ps=DB.prayers;
+  const i=ps.findIndex(x=>x.id===id);
+  if(i>=0){ps[i].isAnswered='true';ps[i].answeredDate=today()}
+  DB.prayers=ps;
+  if(currentPage==='ministry')renderMinistry();
+  if(profileId&&profileTab==='prayer')renderProfileTab();
+  toast('응답된 기도로 표시되었습니다 🙏');
+}
+
+// ===========================
+// ATTENDANCE
+// ===========================
+let attState={},attDate='';
+function renderAttendance(){
+  const el=document.getElementById('att-content');
+  attDate=attDate||getSundayStr();
+  const allAtt=DB.attendance;
+  attState={...(allAtt[attDate]||{})};
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false).sort((a,b)=>a.name.localeCompare(b.name));
+  const present=ms.filter(m=>attState[m.id]==='present').length;
+  const online=ms.filter(m=>attState[m.id]==='online').length;
+  const absent=ms.filter(m=>attState[m.id]==='absent').length;
+
+  let html=`<div style="padding:12px">
+    <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--radius-sm);padding:14px 16px;box-shadow:var(--shadow);margin-bottom:12px">
+      <span style="font-size:14px;font-weight:600;color:var(--text2)">주일 선택</span>
+      <input type="date" id="att-date-inp" value="${attDate}" onchange="changeAttDate(this.value)" style="flex:1;border:none;outline:none;font-size:15px;font-weight:600;text-align:right;background:transparent;color:var(--text)">
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+      <div style="background:var(--success-bg);border-radius:var(--radius-sm);padding:12px;text-align:center"><div style="font-size:11px;color:var(--success);font-weight:700;margin-bottom:4px">출석</div><div style="font-size:24px;font-weight:700;color:var(--success)">${present}</div></div>
+      <div style="background:var(--primary-light);border-radius:var(--radius-sm);padding:12px;text-align:center"><div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:4px">온라인</div><div style="font-size:24px;font-weight:700;color:var(--primary)">${online}</div></div>
+      <div style="background:var(--danger-bg);border-radius:var(--radius-sm);padding:12px;text-align:center"><div style="font-size:11px;color:var(--danger);font-weight:700;margin-bottom:4px">결석</div><div style="font-size:24px;font-weight:700;color:var(--danger)">${absent}</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px">👆 이름을 눌러 상태 변경 &nbsp;·&nbsp; ⬜미체크 → ✅출석 → 🌐온라인 → ❌결석</div>
+  </div>
+  <div class="att-grid">`;
+  ms.forEach(m=>{
+    const st=attState[m.id]||'';
+    const lbl=st==='present'?'출석':st==='absent'?'결석':st==='online'?'온라인':'미체크';
+    html+=`<div class="att-cell ${st}" onclick="cycleAtt('${m.id}')" data-id="${m.id}">
+      <div class="ac-name">${esc(m.name)}</div>
+      <div class="ac-status">${lbl}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // chart
+  html+=`<div style="padding:12px"><div class="sec-title" style="padding:0 0 10px">최근 8주 출석 현황</div>`;
+  const sundays=[];
+  for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-d.getDay()-i*7);sundays.push(d.toISOString().slice(0,10))}
+  const maxP=Math.max(1,...sundays.map(s=>{const r=allAtt[s]||{};return Object.values(r).filter(v=>v==='present'||v==='online').length}));
+  sundays.forEach(s=>{
+    const r=allAtt[s]||{};const cnt=Object.values(r).filter(v=>v==='present'||v==='online').length;const pct=Math.round(cnt/Math.max(ms.length,1)*100);
+    html+=`<div class="chart-item"><div class="ci-top"><div class="ci-label">${s.slice(5)}</div><div class="ci-val">${cnt}명 (${pct}%)</div></div><div class="ci-bar-bg"><div class="ci-bar-fill" style="width:${Math.round(cnt/maxP*100)}%;background:var(--primary)"></div></div></div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+function changeAttDate(d){attDate=d;renderAttendance()}
+
+function cycleAtt(id){
+  const cur=attState[id]||'';
+  const next=cur===''?'present':cur==='present'?'online':cur==='online'?'absent':'';
+  if(next)attState[id]=next;else delete attState[id];
+  const cell=document.querySelector(`.att-cell[data-id="${id}"]`);
+  if(cell){
+    cell.className='att-cell '+(next||'');
+    cell.querySelector('.ac-status').textContent=next==='present'?'출석':next==='absent'?'결석':next==='online'?'온라인':'미체크';
+  }
+  // update counts
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false);
+  const p=ms.filter(m=>attState[m.id]==='present').length;
+  const o=ms.filter(m=>attState[m.id]==='online').length;
+  const a=ms.filter(m=>attState[m.id]==='absent').length;
+  const countEls=document.querySelectorAll('#page-attendance [style*="text-align:center"] [style*="font-size:24px"]');
+  if(countEls[0])countEls[0].textContent=p;
+  if(countEls[1])countEls[1].textContent=o;
+  if(countEls[2])countEls[2].textContent=a;
+}
+
+function saveAttendance(){
+  if(!attDate){toast('날짜를 선택하세요','error');return}
+  const allAtt=DB.attendance;
+  allAtt[attDate]=attState;
+  DB.attendance=allAtt;
+  toast('출석이 저장되었습니다 💾');
+}
+
+// ===========================
+// EXCEL EXPORTS
+// ===========================
+function exportMembers(){
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  const ms=DB.members;
+  if(!ms.length){toast('데이터가 없습니다','error');return}
+  const h=['번호','이름','성별','생년월일','나이','연락처','연락처2','이메일','주소','직분','부서','구역','가족그룹','등록일','세례일','상태','메모'];
+  const r=ms.map((m,i)=>[i+1,m.name,m.gender||'',m.birthdate||'',calcAge(m.birthdate)||'',m.phone||'',m.phone2||'',m.email||'',m.address||'',m.position||'',m.department||'',m.district||'',m.familyGroup||'',m.registrationDate||'',m.baptismDate||'',m.isActive==='false'||m.isActive===false?'비활동':'활동중',m.memo||'']);
+  const ws=XLSX.utils.aoa_to_sheet([h,...r]);
+  ws['!cols']=[{wch:4},{wch:10},{wch:4},{wch:12},{wch:4},{wch:14},{wch:14},{wch:20},{wch:30},{wch:8},{wch:8},{wch:6},{wch:12},{wch:12},{wch:12},{wch:6},{wch:30}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'교인명단');
+  XLSX.writeFile(wb,`교인명단_${today()}.xlsx`);toast('교인 명단 내보내기 완료');
+}
+
+function exportFinance(){
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  const txs=DB.finance;
+  if(!txs.length){toast('데이터가 없습니다','error');return}
+  const wb=XLSX.utils.book_new();
+  const h=['날짜','유형','분류','교인','금액','방법','설명'];
+  const r=txs.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,t.txType==='income'?'수입':'지출',t.category,t.memberName||'',Number(t.amount),t.method||'',t.description||'']);
+  const ws=XLSX.utils.aoa_to_sheet([h,...r]);
+  XLSX.utils.book_append_sheet(wb,ws,'전체내역');
+  // monthly summary
+  const months={};
+  txs.forEach(t=>{const m=t.date.slice(0,7);if(!months[m])months[m]={income:0,expense:0};if(t.txType==='income')months[m].income+=Number(t.amount);else months[m].expense+=Number(t.amount)});
+  const sh2=[['월','수입','지출','잔액']];
+  let bal=0;Object.entries(months).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([m,v])=>{bal+=v.income-v.expense;sh2.push([m,v.income,v.expense,bal])});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sh2),'월별요약');
+  XLSX.writeFile(wb,`교회재정_${today()}.xlsx`);toast('재정 내역 내보내기 완료');
+}
+
+function exportAttendance(){
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  const sundays=[];
+  for(let i=11;i>=0;i--){const d=new Date();d.setDate(d.getDate()-d.getDay()-i*7);sundays.push(d.toISOString().slice(0,10))}
+  const ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false).sort((a,b)=>a.name.localeCompare(b.name));
+  const allAtt=DB.attendance;
+  const h=['이름','직분','부서',...sundays];
+  const r=ms.map(m=>[m.name,m.position||'',m.department||'',...sundays.map(s=>{const st=(allAtt[s]||{})[m.id];return st==='present'?'출석':st==='absent'?'결석':st==='online'?'온라인':''})]);
+  const ws=XLSX.utils.aoa_to_sheet([h,...r]);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'출석부');
+  XLSX.writeFile(wb,`출석부_${today()}.xlsx`);toast('출석부 내보내기 완료');
+}
+
+function exportAll(){
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  const wb=XLSX.utils.book_new();
+  const ms=DB.members;
+  if(ms.length){const h=['이름','성별','생년월일','연락처','직분','부서','구역','등록일','상태'];const r=ms.map(m=>[m.name,m.gender||'',m.birthdate||'',m.phone||'',m.position||'',m.department||'',m.district||'',m.registrationDate||'',m.isActive==='false'||m.isActive===false?'비활동':'활동중']);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([h,...r]),'교인명단')}
+  const txs=DB.finance;
+  if(txs.length){const h=['날짜','유형','분류','교인','금액','방법'];const r=txs.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,t.txType==='income'?'수입':'지출',t.category,t.memberName||'',Number(t.amount),t.method||'']);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([h,...r]),'재정내역')}
+  const vs=DB.visitations;
+  if(vs.length){const h=['날짜','교인','목적','내용','다음심방'];const r=vs.map(v=>[v.date,v.memberName||'',v.purpose||'',v.content||'',v.nextDate||'']);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([h,...r]),'심방기록')}
+  XLSX.writeFile(wb,`교회관리_전체_${today()}.xlsx`);toast('전체 데이터 내보내기 완료');
+}
+
+// ===========================
+// BULK SMS
+// ===========================
+const BULK_TPLS=[
+  {label:'주일예배',text:'주일 예배에 함께해 주세요.\n▪ 시간: 오전 11시 / 장소: 본당\n하나님의 은혜가 충만하시길 바랍니다.'},
+  {label:'새벽기도',text:'새벽기도회(오전 5:30)에 초대합니다.\n함께 하나님 앞에 나아가요!'},
+  {label:'행사안내',text:'[행사명] 행사를 안내드립니다.\n▪ 일시: ___월 ___일 ___시\n▪ 장소: ___\n많은 참여 부탁드립니다!'},
+  {label:'공지사항',text:'중요 공지사항을 알려드립니다.\n[내용을 여기에 입력]\n궁금한 점은 언제든 연락 주세요.'},
+  {label:'기도요청',text:'교우 여러분, 함께 기도해 주세요.\n[기도 제목]\n하나님의 응답이 있기를 기도합니다.'},
+  {label:'수련회',text:'교회 수련회를 안내드립니다.\n▪ 일시: ___ / 장소: ___\n▪ 참가비: ___\n신청 문의 부탁드립니다!'},
+];
+let bulkFilter='all';
+function openBulkSmsSheet(){
+  bulkFilter='all';
+  document.getElementById('bulk-text').value='';
+  updateBulkCount();
+  renderBulkFilter();
+  renderBulkTpls();
+  renderBulkMembers();
+  openSheet('sheet-bulk-sms');
+}
+function renderBulkFilter(){
+  const active=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false&&m.phone);
+  const depts=[...new Set(active.map(m=>m.department).filter(Boolean))];
+  const fr=document.getElementById('bulk-filter-row');
+  fr.innerHTML=[{k:'all',l:'전체활동'},...depts.map(d=>({k:d,l:d}))].map(({k,l})=>
+    `<button class="filter-pill${k===bulkFilter?' active':''}" onclick="setBulkFilter('${k}',this)">${l}</button>`).join('');
+}
+function setBulkFilter(f,el){
+  bulkFilter=f;
+  document.querySelectorAll('#bulk-filter-row .filter-pill').forEach(p=>p.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderBulkMembers();
+}
+function renderBulkTpls(){
+  document.getElementById('bulk-tpl-row').innerHTML=BULK_TPLS.map((t,i)=>
+    `<button class="bulk-tpl-pill" onclick="applyBulkTpl(${i})">${t.label}</button>`).join('');
+}
+function applyBulkTpl(i){
+  document.getElementById('bulk-text').value=BULK_TPLS[i].text;
+  updateBulkCount();
+}
+function renderBulkMembers(){
+  let ms=DB.members.filter(m=>m.isActive!=='false'&&m.isActive!==false&&m.phone);
+  if(bulkFilter!=='all')ms=ms.filter(m=>m.department===bulkFilter);
+  const el=document.getElementById('bulk-member-list');
+  if(!ms.length){el.innerHTML='<div style="padding:14px;text-align:center;color:var(--text3)">연락처가 있는 교인이 없습니다</div>';updateBulkCountLabel();return}
+  el.innerHTML=ms.map(m=>`<div class="bulk-member-item">
+    <input type="checkbox" class="bulk-chk" id="bc_${m.id}" value="${m.id}" checked onchange="updateBulkCountLabel()">
+    <label for="bc_${m.id}" style="flex:1;cursor:pointer;min-width:0">
+      <div class="bmi-name">${esc(m.name)}${m.position?' <span style="font-weight:400;font-size:12px;color:var(--text3)">'+esc(m.position)+'</span>':''}</div>
+      <div class="bmi-sub">${[m.department,m.district].filter(Boolean).join(' · ')||''} ${m.phone}</div>
+    </label>
+  </div>`).join('');
+  document.getElementById('bulk-check-all').checked=true;
+  document.getElementById('bulk-check-all').indeterminate=false;
+  updateBulkCountLabel();
+}
+function toggleBulkAll(el){
+  document.querySelectorAll('#bulk-member-list .bulk-chk').forEach(c=>c.checked=el.checked);
+  updateBulkCountLabel();
+}
+function updateBulkCountLabel(){
+  const total=document.querySelectorAll('#bulk-member-list .bulk-chk').length;
+  const checked=document.querySelectorAll('#bulk-member-list .bulk-chk:checked').length;
+  document.getElementById('bulk-count').textContent=`${checked}명 선택 / 전체 ${total}명`;
+  document.getElementById('bulk-check-all').checked=checked===total&&total>0;
+  document.getElementById('bulk-check-all').indeterminate=checked>0&&checked<total;
+}
+function updateBulkCount(){
+  const len=document.getElementById('bulk-text').value.length;
+  const el=document.getElementById('bulk-char-count');
+  el.textContent=len+'자'+(len>90?' (장문 MMS)':'');
+  el.className='sms-char-count'+(len>90?' warn':'');
+}
+function getBulkPhones(){
+  return [...document.querySelectorAll('#bulk-member-list .bulk-chk:checked')].map(c=>{
+    const m=DB.members.find(x=>x.id===c.value);
+    return m?m.phone.replace(/-/g,''):null;
+  }).filter(Boolean);
+}
+function sendBulkSms(){
+  const phones=getBulkPhones();
+  if(!phones.length){toast('수신자를 선택하세요','error');return}
+  const text=document.getElementById('bulk-text').value.trim();
+  if(!text){toast('메시지를 입력하세요','error');return}
+  location.href=`sms:${phones.join(',')}?body=${encodeURIComponent(text)}`;
+  closeSheet('sheet-bulk-sms');
+}
+function sendBulkKakao(){
+  const phones=getBulkPhones();
+  if(!phones.length){toast('수신자를 선택하세요','error');return}
+  const text=document.getElementById('bulk-text').value.trim();
+  if(!text){toast('메시지를 입력하세요','error');return}
+  const cnt=phones.length;
+  const _open=()=>{toast(`${cnt}명에게 보낼 메시지가 복사되었습니다!\n카카오톡에서 붙여넣기 하세요 😊`,'success');setTimeout(()=>{location.href='kakaotalk://'},700)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(_open).catch(()=>_bulkKakaoFallback(text,cnt))}
+  else _bulkKakaoFallback(text,cnt);
+}
+function _bulkKakaoFallback(text,cnt){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast(`${cnt}명 메시지 복사 완료! 카카오톡에서 붙여넣기 하세요`,'success')}
+  catch{toast('카카오톡을 직접 열어 사용하세요','error')}
+  document.body.removeChild(ta);setTimeout(()=>{location.href='kakaotalk://'},700);
+}
+
+// ===========================
+// EXCEL IMPORT
+// ===========================
+const IMPORT_ALIASES={
+  name:['이름','성명','name'],
+  gender:['성별','gender','sex'],
+  birthdate:['생년월일','생일','birth','birthdate','birthday'],
+  phone:['연락처','전화번호','휴대폰','핸드폰','전화','phone','tel','mobile','hp'],
+  phone2:['연락처2','비상연락처','전화2','phone2','tel2'],
+  email:['이메일','email','e-mail','mail'],
+  address:['주소','address','addr'],
+  position:['직분','직위','직책','position'],
+  department:['부서','department','dept'],
+  district:['구역','district'],
+  familyGroup:['가족그룹','가족그룹명','가족','family'],
+  registrationDate:['등록일','등록날짜','registration'],
+  baptismDate:['세례일','세례날짜','baptism'],
+  isActive:['상태','활동여부','active'],
+  memo:['메모','비고','notes','note','memo'],
+};
+let importData=[];
+function openImportSheet(){
+  importData=[];
+  resetImport();
+  openSheet('sheet-import');
+}
+function resetImport(){
+  document.getElementById('import-file').value='';
+  document.getElementById('import-upload-area').style.display='block';
+  document.getElementById('import-preview-area').style.display='none';
+  document.getElementById('import-preview-area').innerHTML='';
+  document.getElementById('import-add-btn').style.display='none';
+  document.getElementById('import-replace-btn').style.display='none';
+}
+function handleImportFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(!rows.length||rows.length<2){toast('데이터가 없습니다','error');return}
+      processImportRows(rows);
+    }catch(err){toast('파일 오류: '+err.message,'error')}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function findCol(header,field){
+  const aliases=IMPORT_ALIASES[field]||[];
+  for(let i=0;i<header.length;i++){
+    const h=String(header[i]).trim().toLowerCase().replace(/\s/g,'');
+    if(aliases.some(a=>h.includes(a.toLowerCase().replace(/\s/g,''))))return i;
+  }
+  return -1;
+}
+function normalizeDate(v){
+  if(!v)return'';
+  if(v instanceof Date)return v.toISOString().slice(0,10);
+  const s=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  if(/^\d{4}[./]\d{2}[./]\d{2}$/.test(s))return s.replace(/[./]/g,'-');
+  if(/^\d{4}[./]\d{1,2}[./]\d{1,2}$/.test(s)){const p=s.split(/[./]/);return`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`}
+  if(/^\d{8}$/.test(s))return`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
+  return s;
+}
+function processImportRows(rows){
+  const header=rows[0];
+  const dataRows=rows.slice(1).filter(r=>r.some(c=>String(c).trim()!==''));
+  const colMap={};
+  Object.keys(IMPORT_ALIASES).forEach(f=>{const i=findCol(header,f);if(i>=0)colMap[f]=i});
+  if(!('name' in colMap)){toast('이름 컬럼을 찾을 수 없습니다.\n헤더 행에 "이름" 또는 "성명"이 있는지 확인하세요','error');return}
+  importData=dataRows.map(row=>{
+    const obj={id:DB.id()};
+    Object.entries(colMap).forEach(([field,idx])=>{
+      let v=String(row[idx]??'').trim();
+      if(['birthdate','registrationDate','baptismDate'].includes(field))v=normalizeDate(row[idx]);
+      if(field==='isActive'){v=(v==='비활동'||v.toLowerCase()==='false'||v==='0')?'false':'true'}
+      if(field==='phone'||field==='phone2')v=v.replace(/[^\d-+]/g,'');
+      obj[field]=v;
+    });
+    if(!obj.isActive)obj.isActive='true';
+    return obj;
+  }).filter(m=>m.name&&m.name.trim());
+  showImportPreview(header,dataRows,colMap);
+}
+function showImportPreview(header,dataRows,colMap){
+  const mapped=Object.keys(colMap);
+  const unmappedHeaders=header.filter((_,i)=>!Object.values(colMap).includes(i)&&String(header[i]).trim());
+  const previewFields=mapped.slice(0,7);
+  const tableRows=dataRows.slice(0,5).map(row=>`<tr>${previewFields.map(f=>`<td>${esc(String(row[colMap[f]]??'').slice(0,15))}</td>`).join('')}</tr>`).join('');
+  document.getElementById('import-upload-area').style.display='none';
+  document.getElementById('import-preview-area').style.display='block';
+  document.getElementById('import-add-btn').style.display='flex';
+  document.getElementById('import-replace-btn').style.display='flex';
+  document.getElementById('import-preview-area').innerHTML=`
+    <div style="background:var(--success-bg);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:16px;font-weight:700;color:#2E7D32">✅ ${importData.length}명 인식됨</div><div style="font-size:12px;color:#555;margin-top:2px">${mapped.length}개 항목 자동 매핑</div></div>
+      <div style="font-size:13px;color:var(--text2)">현재 ${DB.members.length}명</div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">매핑된 컬럼</div>
+    <div style="display:flex;flex-wrap:wrap;margin-bottom:12px">
+      ${mapped.map(f=>`<span class="col-tag ok">✓ ${IMPORT_ALIASES[f][0]}</span>`).join('')}
+      ${unmappedHeaders.slice(0,3).map(h=>`<span class="col-tag skip">✕ ${esc(String(h))}</span>`).join('')}
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">미리보기 (상위 5명)</div>
+    <div class="import-scroll"><table class="import-tbl"><thead><tr>${previewFields.map(f=>`<th>${IMPORT_ALIASES[f][0]}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>
+    <div style="margin-top:12px;background:var(--warning-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:#7A4F00;line-height:1.6">
+      ➕ <b>추가</b>: 기존 데이터 유지하고 새 교인 추가<br>
+      🔄 <b>전체교체</b>: 기존 교인 데이터 전체 삭제 후 교체
+    </div>`;
+}
+function importMembers(mode){
+  if(!importData.length){toast('가져올 데이터가 없습니다','error');return}
+  if(mode==='replace'){
+    if(!confirm(`기존 교인 ${DB.members.length}명을 전부 삭제하고\n새로 불러온 ${importData.length}명으로 교체하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.`))return;
+    DB.members=importData;
+  } else {
+    DB.members=[...DB.members,...importData];
+  }
+  closeSheet('sheet-import');
+  if(currentPage==='members')renderMembers();
+  renderHome();
+  toast(`${importData.length}명 ${mode==='replace'?'교체':'추가'} 완료!`,'success');
+}
+
+// ===========================
+// SETTINGS / DATA MANAGEMENT
+// ===========================
+// QR Code (순수 JS로 생성 - 외부 라이브러리 없음)
+function showQR(){
+  const url=location.href.replace('localhost','').replace('127.0.0.1','');
+  // 서버 IP 추정: location.hostname이 IP면 그대로, localhost면 안내 표시
+  const displayUrl=location.href;
+  document.getElementById('qr-url').textContent=displayUrl;
+  const canvas=document.getElementById('qr-canvas');
+  const ctx=canvas.getContext('2d');
+  // QR API 사용 (Google Charts QR)
+  const img=new Image();
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(displayUrl)}`;
+  img.crossOrigin='anonymous';
+  img.onload=()=>{ctx.drawImage(img,0,0,200,200)};
+  img.onerror=()=>{
+    // 오프라인 폴백: URL 텍스트만 표시
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,200,200);
+    ctx.fillStyle='#1259C3';ctx.font='12px monospace';ctx.textAlign='center';
+    ctx.fillText('QR생성 실패',100,90);ctx.fillText('(인터넷 필요)',100,110);
+  };
+  img.src=qrUrl;
+  closeSheet('sheet-settings');
+  openSheet('sheet-qr');
+}
+
+function openNetlifyDrop(){
+  closeSheet('sheet-settings');
+  openSheet('sheet-netlify');
+}
+
+async function downloadDeployZip(){
+  if(typeof XLSX==='undefined'){toast('라이브러리 로딩 중...','error');return}
+  toast('ZIP 파일 준비 중...','success');
+  // 각 파일을 fetch해서 JSZip으로 묶기
+  // JSZip이 없으므로 개별 파일 fetch → Blob 방식으로 최소 패키지 생성
+  // 실용적 접근: 서버에서 파일들을 개별 다운로드하도록 안내
+  const files=['church_manager.html','manifest.json','sw.js','favicon.svg','icon-maskable.svg','og-image.svg'];
+  try{
+    // JSZip 동적 로드
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+    const zip=new JSZip();
+    await Promise.all(files.map(async f=>{
+      const r=await fetch('./'+f);
+      if(r.ok){const b=await r.blob();zip.file(f,b)}
+    }));
+    const blob=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='교회관리시스템_배포.zip';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    toast('📦 ZIP 다운로드 완료! Netlify Drop에 드래그하세요','success');
+  }catch(e){
+    toast('ZIP 생성 실패. 파일을 직접 압축해서 사용하세요','error');
+    console.error(e);
+  }
+}
+
+function openSettings(){
+  // Update storage stats
+  const ms=DB.members, fn=DB.finance, vs=DB.visitations, pr=DB.prayers;
+  document.getElementById('storage-stat').innerHTML=`
+    <div style="background:rgba(18,89,195,0.08);border-radius:8px;padding:8px 10px">
+      <div style="font-size:18px;font-weight:700;color:var(--primary)">${ms.length}명</div>
+      <div style="font-size:11px;color:var(--text2)">교인</div>
+    </div>
+    <div style="background:rgba(18,89,195,0.08);border-radius:8px;padding:8px 10px">
+      <div style="font-size:18px;font-weight:700;color:var(--success)">${fn.length}건</div>
+      <div style="font-size:11px;color:var(--text2)">재정</div>
+    </div>
+    <div style="background:rgba(18,89,195,0.08);border-radius:8px;padding:8px 10px">
+      <div style="font-size:18px;font-weight:700;color:var(--purple)">${vs.length}건</div>
+      <div style="font-size:11px;color:var(--text2)">심방</div>
+    </div>
+    <div style="background:rgba(18,89,195,0.08);border-radius:8px;padding:8px 10px">
+      <div style="font-size:18px;font-weight:700;color:var(--warning)">${pr.length}건</div>
+      <div style="font-size:11px;color:var(--text2)">기도제목</div>
+    </div>`;
+  // Storage size estimate
+  let bytes=0;
+  ['members','finance','visitations','prayers','attendance'].forEach(k=>{
+    bytes+=(localStorage.getItem('church_'+k)||'').length*2;
+  });
+  const kb=(bytes/1024).toFixed(1);
+  const pct=Math.min(100,(bytes/(5*1024*1024)*100)).toFixed(1);
+  document.getElementById('storage-size').innerHTML=
+    `저장소: 약 <b>${kb}KB</b> 사용 중 (최대 5MB 중 ${pct}%) · 브라우저 로컬 저장소`;
+  openSheet('sheet-settings');
+}
+
+async function downloadAppWithData(){
+  toast('파일 준비 중...','success');
+  // Current data snapshot
+  const snap={
+    members:DB.members,
+    finance:DB.finance,
+    visitations:DB.visitations,
+    prayers:DB.prayers,
+    attendance:DB.attendance
+  };
+  const preloadScript=`<script>
+(function(){
+  var snap=${JSON.stringify(snap)};
+  // 새 위치에서 열 때만 데이터 복원 (기존 데이터 보호)
+  if(!localStorage.getItem('church_members')||localStorage.getItem('church_members')==='[]'){
+    try{
+      localStorage.setItem('church_members',JSON.stringify(snap.members||[]));
+      localStorage.setItem('church_finance',JSON.stringify(snap.finance||[]));
+      localStorage.setItem('church_visitations',JSON.stringify(snap.visitations||[]));
+      localStorage.setItem('church_prayers',JSON.stringify(snap.prayers||[]));
+      localStorage.setItem('church_attendance',JSON.stringify(snap.attendance||{}));
+      localStorage.setItem('church_init','1');
+    }catch(e){}
+  }
+})();
+<\/script>`;
+
+  let html='';
+  try{
+    // 서버에서 원본 HTML 가져오기 (로컬서버 or 파일서버)
+    const r=await fetch(location.href==='about:blank'?'./church_manager.html':location.href);
+    if(r.ok)html=await r.text();
+  }catch(e){}
+
+  if(!html){
+    // 폴백: 현재 DOM에서 추출
+    html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  }
+  // 데이터 프리로드 스크립트 삽입 (</head> 바로 앞)
+  const modified=html.replace('</head>',preloadScript+'\n</head>');
+  const blob=new Blob([modified],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`교회관리시스템_${today()}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('📄 HTML 파일 다운로드 완료! 어디서든 열 수 있습니다','success');
+  closeSheet('sheet-settings');
+}
+
+function exportDataJson(){
+  const data={
+    _version:'1.0',
+    _exportDate:today(),
+    _app:'교회관리시스템',
+    members:DB.members,
+    finance:DB.finance,
+    visitations:DB.visitations,
+    prayers:DB.prayers,
+    attendance:DB.attendance
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`교회관리_백업_${today()}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('💾 데이터 백업 완료!','success');
+}
+
+function importDataJson(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.members)throw new Error('올바른 백업 파일이 아닙니다');
+      const msg=`백업 데이터를 불러오시겠습니까?\n\n`+
+        `교인 ${data.members.length}명\n`+
+        `재정 ${data.finance?.length||0}건\n`+
+        `심방 ${data.visitations?.length||0}건\n`+
+        `기도제목 ${data.prayers?.length||0}건\n\n`+
+        `⚠️ 현재 데이터는 덮어씌워집니다.`;
+      if(!confirm(msg))return;
+      if(data.members)DB.members=data.members;
+      if(data.finance)DB.finance=data.finance;
+      if(data.visitations)DB.visitations=data.visitations;
+      if(data.prayers)DB.prayers=data.prayers;
+      if(data.attendance)DB.attendance=data.attendance;
+      closeSheet('sheet-settings');
+      renderHome();
+      if(currentPage==='members')renderMembers();
+      if(currentPage==='finance')renderFinance();
+      toast('📂 데이터 복원 완료!','success');
+    }catch(err){toast('파일 오류: '+err.message,'error')}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+function clearAllData(){
+  if(!confirm('⚠️ 모든 데이터를 삭제하시겠습니까?\n\n교인·재정·심방·기도·출석 데이터가\n모두 영구 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.'))return;
+  ['members','finance','visitations','prayers','attendance','init'].forEach(k=>localStorage.removeItem('church_'+k));
+  closeSheet('sheet-settings');
+  renderHome();
+  if(currentPage==='members')renderMembers();
+  if(currentPage==='finance')renderFinance();
+  toast('데이터가 초기화되었습니다','success');
+}
+
+// ===========================
+// PWA INSTALL
+// ===========================
+let _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').style.display='none';
+  _deferredPrompt=null;
+  toast('앱이 설치되었습니다! 홈 화면에서 바로 실행하세요 📱','success');
+});
+function installApp(){
+  if(!_deferredPrompt)return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted')toast('설치 중... 잠시 후 홈 화면을 확인하세요','success');
+    _deferredPrompt=null;
+    document.getElementById('install-banner').style.display='none';
+  });
+}
+// iOS Safari install guide
+(function checkIOS(){
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  const isStandalone=('standalone' in navigator&&navigator.standalone)||window.matchMedia('(display-mode: standalone)').matches;
+  const dismissed=localStorage.getItem('ios-banner-dismissed');
+  if(isIOS&&!isStandalone&&!dismissed){
+    setTimeout(()=>{document.getElementById('ios-banner').style.display='flex'},3000);
+  }
+})();
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{console.log('[PWA] SW registered:',reg.scope)})
+      .catch(err=>{console.log('[PWA] SW registration failed:',err)});
+  });
+}
+
+// ===========================
+// INIT
+// ===========================
+(function init(){
+  // sample data on first run
+  if(!DB.members.length&&!localStorage.getItem('church_init')){
+    localStorage.setItem('church_init','1');
+    const id1=DB.id(),id2=DB.id(),id3=DB.id();
+    DB.members=[
+      {id:id1,name:'홍길동',gender:'남',birthdate:'1975-04-15',phone:'010-1234-5678',email:'hong@example.com',address:'서울시 강남구 역삼동',position:'장로',department:'장년부',district:'1구역',familyGroup:'홍길동 가정',registrationDate:'2005-03-01',baptismDate:'2000-06-15',isActive:'true',memo:'찬양대 지휘 담당'},
+      {id:id2,name:'김은혜',gender:'여',birthdate:'1980-07-20',phone:'010-9876-5432',email:'',address:'서울시 서초구 방배동',position:'권사',department:'여전도회',district:'2구역',familyGroup:'홍길동 가정',registrationDate:'2005-03-01',baptismDate:'2002-04-20',isActive:'true',memo:''},
+      {id:id3,name:'이성민',gender:'남',birthdate:'1995-12-05',phone:'010-5555-1234',email:'',address:'경기도 성남시 분당구',position:'집사',department:'청년부',district:'3구역',familyGroup:'이성민 가정',registrationDate:'2018-09-15',baptismDate:'2019-04-21',isActive:'true',memo:'청년부 회장'},
+    ];
+    DB.finance=[
+      {id:DB.id(),txType:'income',date:today(),category:'십일조',memberId:id1,memberName:'홍길동',amount:500000,method:'계좌이체',description:''},
+      {id:DB.id(),txType:'income',date:today(),category:'주정헌금',memberId:id2,memberName:'김은혜',amount:100000,method:'현금',description:''},
+      {id:DB.id(),txType:'expense',date:today(),category:'예배/성례비',memberId:null,memberName:null,amount:150000,method:'현금',description:'주일 예배 준비'},
+    ];
+  }
+  renderHome();
+})();
+</script>
+</body>
+</html>
